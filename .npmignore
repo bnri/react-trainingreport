@@ -1,0 +1,13 @@
+*
+!dist/components/**/*.d.ts
+!dist/components/**/*.js
+!dist/assets/**/*.d.ts
+!dist/assets/**/*.js
+!dist/hooks/**/*.d.ts
+!dist/hooks/**/*.js
+!dist/styles/**/*.d.ts
+!dist/styles/**/*.js
+!dist/util/**/*.d.ts
+!dist/util/**/*.js
+!dist/index.d.ts
+!dist/types.d.ts
