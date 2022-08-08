@@ -35,9 +35,10 @@ interface ReportType {
   testeeNickname: string;
   startdate: string; // 기준 시작일
   enddate: string; // 기준 종료일
+  season: 1 | 2 | 3 | 4;
   quarterScore: number; // 분기 누적점수(리포트 버튼을 누르는 그 순간의 점수)
   quarterRank: number; // 분기 누적순위(학원내에서)
-  monthScore: number; // 기간 내의 점수
+  dueScore: number; // 기간 내의 점수
 
   performedRatio: number; // 전체 수행률
   avgScore: number; // 평균 수행 점수
