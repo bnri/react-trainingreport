@@ -49,6 +49,10 @@ interface ReportType {
     performedRatio: number;
     avgScore: number;
     avgDuration: number;
+    SentenceMask: number;
+    CategoryFinding: number;
+    KeywordFinding: number;
+    WordOrdering: number;
 
     [key: typenames]: number;
   };
