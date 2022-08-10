@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
 import { Doughnut, Radar } from "react-chartjs-2";
 import "chartjs-plugin-doughnutlabel";
@@ -6,6 +6,40 @@ import "chartjs-plugin-doughnutlabel";
 import "./App.css";
 
 const App: React.FC = () => {
+  const [isMobileWidth, setIsMobileWidth] = useState<boolean>(false);
+
+  useEffect(() => {
+    const resize = () => {
+      const width = window.screen.width;
+      setIsMobileWidth(() => width <= 500);
+    };
+
+    window.addEventListener("resize", resize);
+    resize();
+
+    return () => window.removeEventListener("resize", resize);
+  }, []);
+
+  const trainingTypes = useMemo(() => {
+    return [
+      "Sentence Mask",
+      "Word Ordering",
+      "Keyword Finding",
+      "Category Finding",
+      "Visual Span",
+      "Visual Counting",
+      "TMT",
+      "Stroop",
+      "Saccade Tracking",
+      "Pursuit Tracking",
+      "Anti Tracking",
+      "Sentence Tracking",
+      "Exercise Horizontal",
+      "Exercise Vertical",
+      "Exercise HJump",
+    ];
+  }, []);
+
   const dummyReportData: ReportType = useMemo(() => {
     return {
       agencyID: "jeong",
@@ -31,7 +65,8 @@ const App: React.FC = () => {
           language: "한국어",
           reculsiveCount: 3,
           weeklyPerformedDays: 5,
-          totPerformedCount: 23,
+          performedCount: 23,
+          needPerformedCount: 45,
           performedRatio: 23 / 45,
           totDuration: 5341 / 60,
           avgScore: 75.5832,
@@ -43,7 +78,8 @@ const App: React.FC = () => {
           language: "한국어",
           reculsiveCount: 3,
           weeklyPerformedDays: 5,
-          totPerformedCount: 23,
+          performedCount: 23,
+          needPerformedCount: 45,
           performedRatio: 23 / 45,
           totDuration: 5341 / 60,
           avgScore: 92.5832,
@@ -55,7 +91,8 @@ const App: React.FC = () => {
           language: "한국어",
           reculsiveCount: 2,
           weeklyPerformedDays: 4,
-          totPerformedCount: 10,
+          performedCount: 10,
+          needPerformedCount: 32,
           performedRatio: 10 / 32,
           totDuration: 3323 / 60,
           avgScore: 88.1423,
@@ -67,7 +104,8 @@ const App: React.FC = () => {
           language: "한국어",
           reculsiveCount: 2,
           weeklyPerformedDays: 4,
-          totPerformedCount: 10,
+          performedCount: 10,
+          needPerformedCount: 32,
           performedRatio: 10 / 32,
           totDuration: 3323 / 60,
           avgScore: 86.1423,
@@ -79,7 +117,8 @@ const App: React.FC = () => {
           language: "한국어",
           reculsiveCount: 3,
           weeklyPerformedDays: 5,
-          totPerformedCount: 15,
+          performedCount: 15,
+          needPerformedCount: 45,
           performedRatio: 15 / 45,
           totDuration: 3000 / 60,
           avgScore: 85.1582,
@@ -91,7 +130,8 @@ const App: React.FC = () => {
           language: "한국어",
           reculsiveCount: 2,
           weeklyPerformedDays: 2,
-          totPerformedCount: 9,
+          performedCount: 9,
+          needPerformedCount: 16,
           performedRatio: 9 / 16,
           totDuration: 550 / 60,
           avgScore: 75.412,
@@ -103,7 +143,8 @@ const App: React.FC = () => {
           language: "한국어",
           reculsiveCount: 2,
           weeklyPerformedDays: 2,
-          totPerformedCount: 7,
+          performedCount: 7,
+          needPerformedCount: 16,
           performedRatio: 7 / 16,
           totDuration: 417 / 60,
           avgScore: 90,
@@ -115,7 +156,8 @@ const App: React.FC = () => {
           language: "한국어",
           reculsiveCount: 2,
           weeklyPerformedDays: 2,
-          totPerformedCount: 8,
+          performedCount: 8,
+          needPerformedCount: 16,
           performedRatio: 8 / 16,
           totDuration: 300 / 60,
           avgScore: 93,
@@ -175,6 +217,10 @@ const App: React.FC = () => {
         },
       },
     };
+  }, []);
+
+  const datasetKeyProvider = useCallback(() => {
+    return btoa(Math.random() + "").substring(0, 12);
   }, []);
 
   const ratioChartTitle = useMemo(() => {
@@ -510,64 +556,168 @@ const App: React.FC = () => {
           <StyledChartBox>
             <StyledChartTitle>수행률</StyledChartTitle>
             <StyledChart>
-              <Doughnut data={ratioChartData} options={ratioChartOptions} />
+              <Doughnut data={ratioChartData} options={ratioChartOptions} datasetKeyProvider={datasetKeyProvider} />
             </StyledChart>
           </StyledChartBox>
           <StyledChartBox>
             <StyledChartTitle>평균 수행 점수</StyledChartTitle>
             <StyledChart>
-              <Doughnut data={avgScoreChartData} options={avgScoreChartOptions} />
+              <Doughnut
+                data={avgScoreChartData}
+                options={avgScoreChartOptions}
+                datasetKeyProvider={datasetKeyProvider}
+              />
             </StyledChart>
           </StyledChartBox>
           <StyledChartBox>
             <StyledChartTitle>일 평균 수행 시간</StyledChartTitle>
             <StyledChart>
-              <Doughnut data={avgDurationChartData} options={avgDurationChartOptions} />
+              <Doughnut
+                data={avgDurationChartData}
+                options={avgDurationChartOptions}
+                datasetKeyProvider={datasetKeyProvider}
+              />
             </StyledChart>
           </StyledChartBox>
         </StyledChartWrapper>
-        <StyledTableWrapper>
-          <StyledTableTitle>개별 Training 수행 결과</StyledTableTitle>
-          <StyledTable>
-            <StyledTableRow>
-              <StyledTableCell>
-                <StyledTableHeaderTypeData>할당된 과제</StyledTableHeaderTypeData>
-              </StyledTableCell>
-              <StyledTableCell>
-                <StyledTableHeader>레벨</StyledTableHeader>
-              </StyledTableCell>
-              <StyledTableCell>
-                <StyledTableHeader>언어</StyledTableHeader>
-              </StyledTableCell>
-              <StyledTableCell>
-                <StyledTableHeader>일 수행횟수</StyledTableHeader>
-              </StyledTableCell>
-              <StyledTableCell>
-                <StyledTableHeader>주당 수행일</StyledTableHeader>
-              </StyledTableCell>
-              <StyledTableCell>
-                <StyledTableHeader>총 수행횟수</StyledTableHeader>
-              </StyledTableCell>
-              <StyledTableCell>
-                <StyledTableHeader>수행률</StyledTableHeader>
-              </StyledTableCell>
-              <StyledTableCell>
-                <StyledTableHeader>총 수행시간</StyledTableHeader>
-              </StyledTableCell>
-              <StyledTableCell>
-                <StyledTableHeader>평균 점수</StyledTableHeader>
-              </StyledTableCell>
-              <StyledTableCell>
-                <StyledTableHeader>총 획득 점수</StyledTableHeader>
-              </StyledTableCell>
-            </StyledTableRow>
-          </StyledTable>
-        </StyledTableWrapper>
+        <StyledGridWrapper>
+          <StyledGridTitle>개별 Training 수행 결과</StyledGridTitle>
+          <StyledGrid>
+            <StyledGridRow isMobileWidth={isMobileWidth}>
+              <StyledGridCell
+                header
+                isMobileWidth={isMobileWidth}
+                style={{ gridRow: isMobileWidth ? "1/3" : "auto", background: "#cecece" }}
+              >
+                할당된 과제
+              </StyledGridCell>
+              <StyledGridCell order={1} header isMobileWidth={isMobileWidth}>
+                레벨
+              </StyledGridCell>
+              <StyledGridCell order={3} header isMobileWidth={isMobileWidth}>
+                일 수행횟수
+              </StyledGridCell>
+              <StyledGridCell
+                order={4}
+                header
+                isMobileWidth={isMobileWidth}
+                style={{ display: isMobileWidth ? "none" : "flex" }}
+              >
+                주당 수행일
+              </StyledGridCell>
+              <StyledGridCell order={6} header isMobileWidth={isMobileWidth}>
+                수행률
+              </StyledGridCell>
+              <StyledGridCell order={8} header isMobileWidth={isMobileWidth}>
+                평균 점수
+              </StyledGridCell>
+              <StyledGridCell order={2} header isMobileWidth={isMobileWidth}>
+                언어
+              </StyledGridCell>
+              <StyledGridCell order={5} header isMobileWidth={isMobileWidth}>
+                총 수행횟수
+              </StyledGridCell>
+              <StyledGridCell order={7} header isMobileWidth={isMobileWidth}>
+                총 수행시간
+              </StyledGridCell>
+              <StyledGridCell order={9} header isMobileWidth={isMobileWidth}>
+                총 획득점수
+              </StyledGridCell>
+            </StyledGridRow>
+            {trainingTypes.map((t, i) => {
+              const find = dummyReportData.trainingList.find((f) => f.type === t.split(" ").join(""));
+
+              if (!find) {
+                return (
+                  <StyledGridRow key={`row_${i}`}>
+                    <StyledGridCell
+                      isMobileWidth={isMobileWidth}
+                      style={{
+                        gridRow: isMobileWidth ? "1/3" : "auto",
+                      }}
+                    >
+                      {t}
+                    </StyledGridCell>
+                    <StyledGridCell
+                      isMobileWidth={isMobileWidth}
+                      style={{
+                        gridRow: isMobileWidth ? "1/3" : "auto",
+                        gridColumn: isMobileWidth ? "2/6" : "2/11",
+                      }}
+                    >
+                      수행 없음
+                    </StyledGridCell>
+                  </StyledGridRow>
+                );
+              }
+
+              return (
+                <StyledGridRow key={`row_${i}`}>
+                  <StyledGridCell
+                    isMobileWidth={isMobileWidth}
+                    style={{
+                      gridRow: isMobileWidth ? "1/3" : "auto",
+                    }}
+                  >
+                    {t}
+                  </StyledGridCell>
+                  <StyledGridCell order={1} isMobileWidth={isMobileWidth}>
+                    {find.level}
+                  </StyledGridCell>
+                  <StyledGridCell order={3} isMobileWidth={isMobileWidth}>
+                    {find.reculsiveCount}회
+                  </StyledGridCell>
+                  <StyledGridCell
+                    order={4}
+                    isMobileWidth={isMobileWidth}
+                    style={{ display: isMobileWidth ? "none" : "flex" }}
+                  >
+                    {find.weeklyPerformedDays}일
+                  </StyledGridCell>
+                  <StyledGridCell order={6} isMobileWidth={isMobileWidth}>
+                    {parseFloat((find.performedRatio * 100).toFixed(2))}%
+                  </StyledGridCell>
+                  <StyledGridCell order={8} isMobileWidth={isMobileWidth}>
+                    {parseFloat(find.avgScore.toFixed(2))}점
+                  </StyledGridCell>
+                  <StyledGridCell
+                    order={2}
+                    isMobileWidth={isMobileWidth}
+                    style={{ background: isMobileWidth ? "#cecece" : "transparent" }}
+                  >
+                    {find.language}
+                  </StyledGridCell>
+                  <StyledGridCell
+                    order={5}
+                    isMobileWidth={isMobileWidth}
+                    style={{ background: isMobileWidth ? "#cecece" : "transparent" }}
+                  >
+                    {isMobileWidth ? `${find.performedCount}회` : `${find.performedCount} / ${find.needPerformedCount}`}
+                  </StyledGridCell>
+                  <StyledGridCell
+                    order={7}
+                    isMobileWidth={isMobileWidth}
+                    style={{ background: isMobileWidth ? "#cecece" : "transparent" }}
+                  >
+                    {parseFloat(find.totDuration.toFixed(2))}분
+                  </StyledGridCell>
+                  <StyledGridCell
+                    order={9}
+                    isMobileWidth={isMobileWidth}
+                    style={{ background: isMobileWidth ? "#cecece" : "transparent" }}
+                  >
+                    {parseFloat(find.totScore.toFixed(2))}점
+                  </StyledGridCell>
+                </StyledGridRow>
+              );
+            })}
+          </StyledGrid>
+        </StyledGridWrapper>
         <StyledResultWrapper>
           <StyledResultTitle>개별 Training 수행 결과</StyledResultTitle>
           <StyledResultRow>
             <StyledResultChartBox>
-              <Radar data={readingChartData} options={readingChartOptions} />
+              <Radar data={readingChartData} options={readingChartOptions} datasetKeyProvider={datasetKeyProvider} />
             </StyledResultChartBox>
             <StyledResultTextBox>
               <StyledResultTextTitle>Reading Training</StyledResultTextTitle>
@@ -586,7 +736,7 @@ const App: React.FC = () => {
           </StyledResultRow>
           <StyledResultRow>
             <StyledResultChartBox>
-              <Radar data={readingChartData} options={readingChartOptions} />
+              <Radar data={readingChartData} options={readingChartOptions} datasetKeyProvider={datasetKeyProvider} />
             </StyledResultChartBox>
             <StyledResultTextBox>
               <StyledResultTextTitle>Cognitive Training</StyledResultTextTitle>
@@ -603,7 +753,7 @@ const App: React.FC = () => {
           </StyledResultRow>
           <StyledResultRow>
             <StyledResultChartBox>
-              <Radar data={readingChartData} options={readingChartOptions} />
+              <Radar data={readingChartData} options={readingChartOptions} datasetKeyProvider={datasetKeyProvider} />
             </StyledResultChartBox>
             <StyledResultTextBox>
               <StyledResultTextTitle>Tracking Training</StyledResultTextTitle>
@@ -623,7 +773,7 @@ const App: React.FC = () => {
           </StyledResultRow>
           <StyledResultRow>
             <StyledResultChartBox>
-              <Radar data={readingChartData} options={readingChartOptions} />
+              <Radar data={readingChartData} options={readingChartOptions} datasetKeyProvider={datasetKeyProvider} />
             </StyledResultChartBox>
             <StyledResultTextBox>
               <StyledResultTextTitle>Exercise Training</StyledResultTextTitle>
@@ -657,9 +807,10 @@ const StyledReport = styled.div`
   width: 100%;
   margin: 0;
   padding: 1em;
-  font-size: 62.5%;
+  font-size: 62.5%; // 16px -> 10px
   position: relative;
   color: #333;
+  transition: 0.2s;
 
   &,
   & * {
@@ -681,15 +832,31 @@ const StyledMainTitle = styled.h2`
   flex-wrap: nowrap;
   text-align: center;
   font-size: 1.6em;
+
+  @media screen and (min-width: 500px) {
+    font-size: 2em;
+  }
+
+  @media screen and (min-width: 800px) {
+    font-size: 2.5em;
+  }
 `;
 
 const StyledDueTitle = styled.h3`
   margin: 5px 0;
   font-size: 1.4em;
+
+  @media screen and (min-width: 500px) {
+    font-size: 1.6em;
+  }
+
+  @media screen and (min-width: 800px) {
+    font-size: 1.8em;
+  }
 `;
 
 const StyledInfoBox = styled(StyledWrapper)`
-  height: 80px;
+  height: 100px;
   display: flex;
   align-items: center;
 `;
@@ -729,6 +896,7 @@ const StyledChartWrapper = styled(StyledWrapper)`
   align-items: center;
   gap: 1em;
 `;
+
 const StyledChartBox = styled.div`
   width: 250px;
   height: 300px;
@@ -738,6 +906,7 @@ const StyledChartBox = styled.div`
   align-items: center;
   border: 2px solid #333;
 `;
+
 const StyledChartTitle = styled.h3`
   width: 100%;
   height: 30px;
@@ -752,18 +921,83 @@ const StyledChart = styled.div`
   height: calc(100% - 30px);
 `;
 
-const StyledTableWrapper = styled(StyledWrapper)``;
-const StyledTableTitle = styled.h2``;
-const StyledTable = styled.div``;
-const StyledTableRow = styled.div``;
-const StyledTableCell = styled.div``;
-const StyledTableHeaderTypeData = styled.div``;
-const StyledTableHeader = styled.div``;
-const StyledTableData = styled.div``;
+const StyledGridWrapper = styled(StyledWrapper)``;
+const StyledGridTitle = styled.h2``;
+const StyledGrid = styled.div`
+  display: grid;
+  grid-template-rows: repeat(16, 1fr);
+  grid-template-columns: 1fr;
+  border-top: 1px solid #333;
+  border-left: 1px solid #333;
+  border-collapse: collapse;
+`;
 
-const StyledResultWrapper = styled(StyledWrapper)``;
+interface GridProps {
+  display?: string;
+  order?: number;
+  header?: boolean;
+  isMobileWidth?: boolean;
+}
+
+const StyledGridRow = styled.div<GridProps>`
+  width: 100%;
+  min-height: 3em;
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  border-collapse: collapse;
+
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1.3fr repeat(4, 1fr);
+
+  @media screen and (min-width: 501px) {
+    min-height: 4em;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr repeat(9, 0.5fr);
+  }
+`;
+const StyledGridCell = styled.div<GridProps>`
+  height: 100%;
+  padding: 0.5em 0;
+  border-right: 1px solid #333;
+  border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  ${(props) =>
+    props.header
+      ? css`
+          font-size: 1.2em;
+          font-weight: 700;
+          background: #cecece;
+          @media screen and (min-width: 1024px) {
+            font-size: 1.4em;
+          }
+        `
+      : css`
+          font-size: 1.1em;
+          @media screen and (min-width: 1024px) {
+            font-size: 1.2em;
+          }
+        `}
+  ${(props) =>
+    !props.isMobileWidth && props.order
+      ? css`
+          order: ${props.order};
+        `
+      : css``}
+`;
+
+const StyledResultWrapper = styled(StyledWrapper)`
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+`;
 const StyledResultTitle = styled.h2``;
 const StyledResultRow = styled.div`
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -774,13 +1008,13 @@ const StyledResultChartBox = styled.div`
   display: flex;
 
   padding: 5px;
-  width: 300px;
+  min-width: 300px;
   height: 300px;
   border: 2px solid #f7f7f7;
 `;
 const StyledResultTextBox = styled.div`
   flex: 1;
-  max-height: 300px;
+  min-width: 300px;
 `;
 const StyledResultTextTitle = styled.div`
   height: 30px;
@@ -788,9 +1022,28 @@ const StyledResultTextTitle = styled.div`
   align-items: center;
   font-size: 1.4em;
   font-weight: 700;
+
+  @media screen and (min-width: 700px) {
+    font-size: 1.6em;
+  }
+
+  @media screen and (min-width: 1024px) {
+    font-size: 1.8em;
+  }
 `;
 const StyledResultText = styled.div`
-  height: 270px;
   font-size: 1.3em;
   line-height: 1.5em;
+
+  ul {
+    padding-left: 2em;
+  }
+
+  @media screen and (min-width: 700px) {
+    font-size: 1.5em;
+  }
+
+  @media screen and (min-width: 1024px) {
+    font-size: 1.7em;
+  }
 `;

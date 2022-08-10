@@ -21,7 +21,8 @@ interface TrainingType {
   language?: "한국어" | "영어";
   reculsiveCount: number; // 일 수행횟수(recul)
   weeklyPerformedDays: number; // 주당 수행일(dayofweek 개수)
-  totPerformedCount: number; // 총 수행횟수
+  performedCount: number; // 수행횟수
+  needPerformedCount: number; // 수행해야하는 횟수
   performedRatio: number; // 수행률
   totDuration: number; // 총 수행시간
   avgScore: number; // 평균점수
