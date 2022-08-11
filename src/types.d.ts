@@ -13,7 +13,8 @@ type typenames =
   | "SentenceTracking"
   | "ExerciseHorizontal"
   | "ExerciseVertical"
-  | "ExerciseHJump";
+  | "ExerciseHJump"
+  | "ExerciseVJump";
 
 interface TrainingType {
   type: typenames;
@@ -54,7 +55,17 @@ interface ReportType {
     CategoryFinding: number;
     KeywordFinding: number;
     WordOrdering: number;
-
-    [key: typenames]: number;
+    VisualSpan: number;
+    VisualCounting: number;
+    TMT: number;
+    Stroop: number;
+    SaccadeTracking: number;
+    PursuitTracking: number;
+    AntiTracking: number;
+    SentenceTracking: number;
+    ExerciseHorizontal: number;
+    ExerciseVertical: number;
+    ExerciseHJump: number;
+    ExerciseVJump: number;
   };
 }

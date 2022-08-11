@@ -10,7 +10,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const resize = () => {
-      const width = window.screen.width;
+      const width = window.innerWidth;
       setIsMobileWidth(() => width <= 500);
     };
 
@@ -37,6 +37,7 @@ const App: React.FC = () => {
       "Exercise Horizontal",
       "Exercise Vertical",
       "Exercise HJump",
+      "Exercise VJump",
     ];
   }, []);
 
@@ -185,6 +186,7 @@ const App: React.FC = () => {
         ExerciseHorizontal: 57,
         ExerciseVertical: 75,
         ExerciseHJump: 81,
+        ExerciseVJump: 71,
       },
     };
   }, []);
@@ -206,6 +208,9 @@ const App: React.FC = () => {
         duration: 1200,
       },
       maintainAspectRatio: false,
+      tooltips: {
+        enabled: false,
+      },
       plugins: {
         datalabels: {
           display: false,
@@ -218,6 +223,33 @@ const App: React.FC = () => {
       },
     };
   }, []);
+
+  const commonResultChartOption = useMemo(() => {
+    if (!commonChartOption) {
+      return;
+    }
+
+    return {
+      ...commonChartOption,
+      legend: {
+        display: true,
+        position: "bottom",
+        align: "start",
+      },
+      scale: {
+        angleLines: {
+          display: false,
+        },
+        ticks: {
+          suggestedMin: 0,
+          suggestedMax: 100,
+        },
+      },
+      plugins: {
+        ...commonChartOption.plugins,
+      },
+    };
+  }, [commonChartOption]);
 
   const datasetKeyProvider = useCallback(() => {
     return btoa(Math.random() + "").substring(0, 12);
@@ -242,18 +274,20 @@ const App: React.FC = () => {
       datasets: [
         {
           data: [dummyReportData.performedRatio, 100 - dummyReportData.performedRatio],
-          backgroundColor: ["#1EACFF", "transparent"],
+          // backgroundColor: ["#1EACFF", "transparent"],
+          backgroundColor: ["#009bde", "transparent"],
         },
         {
           data: [dummyReportData.groupScoreList.performedRatio, 100 - dummyReportData.groupScoreList.performedRatio],
-          backgroundColor: ["#06D5AC", "transparent"],
+          // backgroundColor: ["#06D5AC", "transparent"],
+          backgroundColor: ["#ada9bb", "transparent"],
         },
       ],
     };
   }, [dummyReportData]);
 
   const ratioChartOptions = useMemo(() => {
-    if (!commonChartOption) {
+    if (!ratioChartData || !commonChartOption) {
       return;
     }
 
@@ -262,7 +296,7 @@ const App: React.FC = () => {
       title: {
         display: true,
         text: ratioChartTitle,
-        color: "#333",
+        color: "#464555",
         fontSize: 14,
         fontFamily: "'FontAwesome','Helvetica Neue', 'Helvetica', 'Arial', sans-serif", //
       },
@@ -275,27 +309,27 @@ const App: React.FC = () => {
               font: {
                 size: "24",
               },
-              color: "#1EACFF",
+              color: ratioChartData.datasets[0].backgroundColor[0],
             },
             {
               text: `그룹평균`,
               font: {
                 size: "16",
               },
-              color: "#333",
+              color: "#464555",
             },
             {
               text: `${dummyReportData.groupScoreList.performedRatio}%`,
               font: {
                 size: "20",
               },
-              color: "#06D5AC",
+              color: ratioChartData.datasets[1].backgroundColor[0],
             },
           ],
         },
       },
     };
-  }, [dummyReportData, ratioChartTitle, commonChartOption]);
+  }, [dummyReportData, ratioChartTitle, ratioChartData, commonChartOption]);
 
   const avgScoreChartTitle = useMemo(() => {
     if (!dummyReportData) {
@@ -316,18 +350,18 @@ const App: React.FC = () => {
       datasets: [
         {
           data: [dummyReportData.avgScore, 100 - dummyReportData.avgScore],
-          backgroundColor: ["#1EACFF", "transparent"],
+          backgroundColor: ["#009bde", "transparent"],
         },
         {
           data: [dummyReportData.groupScoreList.avgScore, 100 - dummyReportData.groupScoreList.avgScore],
-          backgroundColor: ["#06D5AC", "transparent"],
+          backgroundColor: ["#ada9bb", "transparent"],
         },
       ],
     };
   }, [dummyReportData]);
 
   const avgScoreChartOptions = useMemo(() => {
-    if (!commonChartOption) {
+    if (!avgScoreChartData || !commonChartOption) {
       return;
     }
 
@@ -336,7 +370,7 @@ const App: React.FC = () => {
       title: {
         display: true,
         text: avgScoreChartTitle,
-        color: "#333",
+        color: "#464555",
         fontSize: 14,
         fontFamily: "'FontAwesome','Helvetica Neue', 'Helvetica', 'Arial', sans-serif", //
       },
@@ -349,27 +383,27 @@ const App: React.FC = () => {
               font: {
                 size: "24",
               },
-              color: "#1EACFF",
+              color: avgScoreChartData.datasets[0].backgroundColor[0],
             },
             {
               text: `그룹평균`,
               font: {
                 size: "16",
               },
-              color: "#333",
+              color: "#464555",
             },
             {
               text: `${dummyReportData.groupScoreList.avgScore}점`,
               font: {
                 size: "20",
               },
-              color: "#06D5AC",
+              color: avgScoreChartData.datasets[1].backgroundColor[0],
             },
           ],
         },
       },
     };
-  }, [dummyReportData, avgScoreChartTitle, commonChartOption]);
+  }, [dummyReportData, avgScoreChartTitle, avgScoreChartData, commonChartOption]);
 
   const avgDurationChartTitle = useMemo(() => {
     if (!dummyReportData) {
@@ -390,18 +424,18 @@ const App: React.FC = () => {
       datasets: [
         {
           data: [dummyReportData.avgDuration, 100 - dummyReportData.avgDuration],
-          backgroundColor: ["#1EACFF", "transparent"],
+          backgroundColor: ["#009bde", "transparent"],
         },
         {
           data: [dummyReportData.groupScoreList.avgDuration, 100 - dummyReportData.groupScoreList.avgDuration],
-          backgroundColor: ["#06D5AC", "transparent"],
+          backgroundColor: ["#ada9bb", "transparent"],
         },
       ],
     };
   }, [dummyReportData]);
 
   const avgDurationChartOptions = useMemo(() => {
-    if (!commonChartOption) {
+    if (!avgDurationChartData || !commonChartOption) {
       return;
     }
 
@@ -410,7 +444,7 @@ const App: React.FC = () => {
       title: {
         display: true,
         text: avgDurationChartTitle,
-        color: "#333",
+        color: "#464555",
         fontSize: 14,
         fontFamily: "'FontAwesome','Helvetica Neue', 'Helvetica', 'Arial', sans-serif", //
       },
@@ -423,34 +457,34 @@ const App: React.FC = () => {
               font: {
                 size: "24",
               },
-              color: "#1EACFF",
+              color: avgDurationChartData.datasets[0].backgroundColor[0],
             },
             {
               text: `그룹평균`,
               font: {
                 size: "16",
               },
-              color: "#333",
+              color: "#464555",
             },
             {
               text: `${dummyReportData.groupScoreList.avgDuration}분`,
               font: {
                 size: "20",
               },
-              color: "#06D5AC",
+              color: avgDurationChartData.datasets[1].backgroundColor[0],
             },
           ],
         },
       },
     };
-  }, [dummyReportData, avgDurationChartTitle, commonChartOption]);
+  }, [dummyReportData, avgDurationChartTitle, avgDurationChartData, commonChartOption]);
 
-  const readingChartTitle = useMemo(() => {
+  const resultChartTitle = useMemo(() => {
     if (!dummyReportData) {
       return;
     }
 
-    return "Reading Training";
+    return ["Reading Training", "Cognitive Training", "Tracking Training", "Exercise Training"];
   }, [dummyReportData]);
 
   const readingChartData = useMemo(() => {
@@ -463,29 +497,32 @@ const App: React.FC = () => {
     const cf = dummyReportData.trainingList.find((f) => f.type === "CategoryFinding");
 
     return {
+      titleIndex: 0,
       labels: ["SentenceMask", "WordOrdering", "KeywordFinding", "CategoryFinding"],
       type: "radar",
       datasets: [
         {
+          label: "Me",
           data: [
             (sm && sm.avgScore) || 0,
             (wo && wo.avgScore) || 0,
             (kf && kf.avgScore) || 0,
             (cf && cf.avgScore) || 0,
           ],
-          borderColor: "#1EACFF",
-          backgroundColor: "#1EACFF",
+          borderColor: "#009bde",
+          backgroundColor: "#009bde",
           fill: false,
         },
         {
+          label: "Group",
           data: [
             dummyReportData.groupScoreList.SentenceMask || 0,
             dummyReportData.groupScoreList.WordOrdering || 0,
             dummyReportData.groupScoreList.KeywordFinding || 0,
             dummyReportData.groupScoreList.CategoryFinding || 0,
           ],
-          borderColor: "#B1ADAD",
-          backgroundColor: "#B1ADAD",
+          borderColor: "#ada9bb",
+          backgroundColor: "#ada9bb",
           fill: false,
         },
       ],
@@ -493,38 +530,198 @@ const App: React.FC = () => {
   }, [dummyReportData]);
 
   const readingChartOptions = useMemo(() => {
-    if (!commonChartOption) {
+    if (!readingChartData || !commonResultChartOption || !resultChartTitle) {
       return;
     }
 
     return {
-      ...commonChartOption,
+      ...commonResultChartOption,
       title: {
         display: true,
-        text: readingChartTitle,
-        color: "#333",
+        text: resultChartTitle[readingChartData.titleIndex],
+        color: "#464555",
         fontSize: 14,
         fontFamily: "'FontAwesome','Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
       },
-      legend: {
+    };
+  }, [resultChartTitle, readingChartData, commonResultChartOption]);
+
+  const cognitiveChartData = useMemo(() => {
+    if (!dummyReportData) {
+      return;
+    }
+    const vs = dummyReportData.trainingList.find((f) => f.type === "VisualSpan");
+    const vc = dummyReportData.trainingList.find((f) => f.type === "VisualCounting");
+    const tmt = dummyReportData.trainingList.find((f) => f.type === "TMT");
+    const st = dummyReportData.trainingList.find((f) => f.type === "Stroop");
+
+    return {
+      titleIndex: 1,
+      labels: ["VisualSpan", "VisualCounting", "TMT", "Stroop"],
+      type: "radar",
+      datasets: [
+        {
+          label: "Me",
+          data: [
+            (vs && vs.avgScore) || 0,
+            (vc && vc.avgScore) || 0,
+            (tmt && tmt.avgScore) || 0,
+            (st && st.avgScore) || 0,
+          ],
+          borderColor: "#009bde",
+          backgroundColor: "#009bde",
+          fill: false,
+        },
+        {
+          label: "Group",
+          data: [
+            dummyReportData.groupScoreList.VisualSpan || 0,
+            dummyReportData.groupScoreList.VisualCounting || 0,
+            dummyReportData.groupScoreList.TMT || 0,
+            dummyReportData.groupScoreList.Stroop || 0,
+          ],
+          borderColor: "#ada9bb",
+          backgroundColor: "#ada9bb",
+          fill: false,
+        },
+      ],
+    };
+  }, [dummyReportData]);
+
+  const cognitiveChartOption = useMemo(() => {
+    if (!cognitiveChartData || !commonResultChartOption || !resultChartTitle) {
+      return;
+    }
+
+    return {
+      ...commonResultChartOption,
+      title: {
         display: true,
-        position: "bottom",
-        align: "start",
-      },
-      plugins: {
-        ...commonChartOption.plugins,
-      },
-      scale: {
-        angleLines: {
-          display: false,
-        },
-        ticks: {
-          suggestedMin: 0,
-          suggestedMax: 100,
-        },
+        text: resultChartTitle[cognitiveChartData.titleIndex],
+        color: "#464555",
+        fontSize: 14,
+        fontFamily: "'FontAwesome','Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
       },
     };
-  }, [dummyReportData, readingChartTitle, commonChartOption]);
+  }, [resultChartTitle, cognitiveChartData, commonResultChartOption]);
+
+  const trackingChartData = useMemo(() => {
+    if (!dummyReportData) {
+      return;
+    }
+    const st = dummyReportData.trainingList.find((f) => f.type === "SaccadeTracking");
+    const pt = dummyReportData.trainingList.find((f) => f.type === "PursuitTracking");
+    const at = dummyReportData.trainingList.find((f) => f.type === "AntiTracking");
+    const set = dummyReportData.trainingList.find((f) => f.type === "SentenceTracking");
+
+    return {
+      titleIndex: 2,
+      labels: ["SaccadeTracking", "PursuitTracking", "AntiTracking", "SentenceTracking"],
+      type: "radar",
+      datasets: [
+        {
+          label: "Me",
+          data: [
+            (st && st.avgScore) || 0,
+            (pt && pt.avgScore) || 0,
+            (at && at.avgScore) || 0,
+            (set && set.avgScore) || 0,
+          ],
+          borderColor: "#009bde",
+          backgroundColor: "#009bde",
+          fill: false,
+        },
+        {
+          label: "Group",
+          data: [
+            dummyReportData.groupScoreList.SaccadeTracking || 0,
+            dummyReportData.groupScoreList.PursuitTracking || 0,
+            dummyReportData.groupScoreList.AntiTracking || 0,
+            dummyReportData.groupScoreList.SentenceTracking || 0,
+          ],
+          borderColor: "#ada9bb",
+          backgroundColor: "#ada9bb",
+          fill: false,
+        },
+      ],
+    };
+  }, [dummyReportData]);
+
+  const trackingChartOption = useMemo(() => {
+    if (!trackingChartData || !commonResultChartOption || !resultChartTitle) {
+      return;
+    }
+
+    return {
+      ...commonResultChartOption,
+      title: {
+        display: true,
+        text: resultChartTitle[trackingChartData.titleIndex],
+        color: "#464555",
+        fontSize: 14,
+        fontFamily: "'FontAwesome','Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+      },
+    };
+  }, [resultChartTitle, trackingChartData, commonResultChartOption]);
+
+  const exerciseChartData = useMemo(() => {
+    if (!dummyReportData) {
+      return;
+    }
+    const eh = dummyReportData.trainingList.find((f) => f.type === "ExerciseHorizontal");
+    const ev = dummyReportData.trainingList.find((f) => f.type === "ExerciseVertical");
+    const ehj = dummyReportData.trainingList.find((f) => f.type === "ExerciseHJump");
+    const evj = dummyReportData.trainingList.find((f) => f.type === "ExerciseVJump");
+
+    return {
+      titleIndex: 3,
+      labels: ["ExerciseHorizontal", "ExerciseVertical", "ExerciseHJump", "ExerciseVJump"],
+      type: "radar",
+      datasets: [
+        {
+          label: "Me",
+          data: [
+            (eh && eh.avgScore) || 0,
+            (ev && ev.avgScore) || 0,
+            (ehj && ehj.avgScore) || 0,
+            (evj && evj.avgScore) || 0,
+          ],
+          borderColor: "#009bde",
+          backgroundColor: "#009bde",
+          fill: false,
+        },
+        {
+          label: "Group",
+          data: [
+            dummyReportData.groupScoreList.ExerciseHorizontal || 0,
+            dummyReportData.groupScoreList.ExerciseVertical || 0,
+            dummyReportData.groupScoreList.ExerciseHJump || 0,
+            dummyReportData.groupScoreList.ExerciseVJump || 0,
+          ],
+          borderColor: "#ada9bb",
+          backgroundColor: "#ada9bb",
+          fill: false,
+        },
+      ],
+    };
+  }, [dummyReportData]);
+
+  const exerciseChartOption = useMemo(() => {
+    if (!exerciseChartData || !commonResultChartOption || !resultChartTitle) {
+      return;
+    }
+
+    return {
+      ...commonResultChartOption,
+      title: {
+        display: true,
+        text: resultChartTitle[exerciseChartData.titleIndex],
+        color: "#464555",
+        fontSize: 14,
+        fontFamily: "'FontAwesome','Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+      },
+    };
+  }, [resultChartTitle, exerciseChartData, commonResultChartOption]);
 
   return (
     <div className="App">
@@ -546,7 +743,7 @@ const App: React.FC = () => {
               {dummyReportData.season}분기 누적점수 : {dummyReportData.quarterScore.toLocaleString()}점({TIER},{" "}
               {dummyReportData.quarterRank}위)
             </StyledInfoText>
-            <StyledInfoText>기간 내 총 획득 점수 : {dummyReportData.dueScore}점</StyledInfoText>
+            <StyledInfoText>기간 내 총 획득 점수 : {dummyReportData.dueScore.toLocaleString()}점</StyledInfoText>
           </StyledInfoLeftBox>
           <StyledInfoRightBox>
             <img src={MEDAL_IMG} alt="Medal" />
@@ -584,11 +781,7 @@ const App: React.FC = () => {
           <StyledGridTitle>개별 Training 수행 결과</StyledGridTitle>
           <StyledGrid>
             <StyledGridRow isMobileWidth={isMobileWidth}>
-              <StyledGridCell
-                header
-                isMobileWidth={isMobileWidth}
-                style={{ gridRow: isMobileWidth ? "1/3" : "auto", background: "#cecece" }}
-              >
+              <StyledGridCell header isMobileWidth={isMobileWidth} style={{ gridRow: isMobileWidth ? "1/3" : "auto" }}>
                 할당된 과제
               </StyledGridCell>
               <StyledGridCell order={1} header isMobileWidth={isMobileWidth}>
@@ -683,28 +876,28 @@ const App: React.FC = () => {
                   <StyledGridCell
                     order={2}
                     isMobileWidth={isMobileWidth}
-                    style={{ background: isMobileWidth ? "#cecece" : "transparent" }}
+                    style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}
                   >
                     {find.language}
                   </StyledGridCell>
                   <StyledGridCell
                     order={5}
                     isMobileWidth={isMobileWidth}
-                    style={{ background: isMobileWidth ? "#cecece" : "transparent" }}
+                    style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}
                   >
                     {isMobileWidth ? `${find.performedCount}회` : `${find.performedCount} / ${find.needPerformedCount}`}
                   </StyledGridCell>
                   <StyledGridCell
                     order={7}
                     isMobileWidth={isMobileWidth}
-                    style={{ background: isMobileWidth ? "#cecece" : "transparent" }}
+                    style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}
                   >
                     {parseFloat(find.totDuration.toFixed(2))}분
                   </StyledGridCell>
                   <StyledGridCell
                     order={9}
                     isMobileWidth={isMobileWidth}
-                    style={{ background: isMobileWidth ? "#cecece" : "transparent" }}
+                    style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}
                   >
                     {parseFloat(find.totScore.toFixed(2))}점
                   </StyledGridCell>
@@ -723,7 +916,8 @@ const App: React.FC = () => {
               <StyledResultTextTitle>Reading Training</StyledResultTextTitle>
               <StyledResultText>
                 <span>
-                  읽기를 기반으로 속도 제어, 안정성 향상, 문장 완성, 어휘의 탐색 및 판단 능력을 향상시키는 훈련입니다.
+                  &nbsp;읽기를 기반으로 속도 제어, 안정성 향상, 문장 완성, 어휘의 탐색 및 판단 능력을 향상시키는
+                  훈련입니다.
                 </span>
                 <ul>
                   <li>Word Ordering : 뒤섞여 있는 어절들을 정상적인 문장이 되도록 순서를 맞춰야 합니다.</li>
@@ -734,14 +928,17 @@ const App: React.FC = () => {
               </StyledResultText>
             </StyledResultTextBox>
           </StyledResultRow>
+          <StyledDashHR />
           <StyledResultRow>
             <StyledResultChartBox>
-              <Radar data={readingChartData} options={readingChartOptions} datasetKeyProvider={datasetKeyProvider} />
+              <Radar data={cognitiveChartData} options={cognitiveChartOption} datasetKeyProvider={datasetKeyProvider} />
             </StyledResultChartBox>
             <StyledResultTextBox>
               <StyledResultTextTitle>Cognitive Training</StyledResultTextTitle>
               <StyledResultText>
-                <span>학습의 기초가 되는 시지각, 인지능력, 판단력 및 행동 제어 능력을 향상시키는 훈련입니다.</span>
+                <span>
+                  &nbsp;학습의 기초가 되는 시지각, 인지능력, 판단력 및 행동 제어 능력을 향상시키는 훈련입니다.
+                </span>
                 <ul>
                   <li>Visual Span : 순간적으로 제시되는 무의미한 글자들을 한 눈에 최대한 많이 기억해야 합니다.</li>
                   <li>Visual Counting : 순간적으로 제시되는 점의 개수를 패턴화하여 세야 합니다.</li>
@@ -751,15 +948,16 @@ const App: React.FC = () => {
               </StyledResultText>
             </StyledResultTextBox>
           </StyledResultRow>
+          <StyledDashHR />
           <StyledResultRow>
             <StyledResultChartBox>
-              <Radar data={readingChartData} options={readingChartOptions} datasetKeyProvider={datasetKeyProvider} />
+              <Radar data={trackingChartData} options={trackingChartOption} datasetKeyProvider={datasetKeyProvider} />
             </StyledResultChartBox>
             <StyledResultTextBox>
               <StyledResultTextTitle>Tracking Training</StyledResultTextTitle>
               <StyledResultText>
                 <span>
-                  읽기와 시지각의 기본이 되는 안구운동의 제어와 통제, 지각 집중력을 향상시킵니다. 시선추적장치를
+                  &nbsp;읽기와 시지각의 기본이 되는 안구운동의 제어와 통제, 지각 집중력을 향상시킵니다. 시선추적장치를
                   활용하며, 게임 형식으로 진행합니다.
                 </span>
                 <ul>
@@ -771,15 +969,16 @@ const App: React.FC = () => {
               </StyledResultText>
             </StyledResultTextBox>
           </StyledResultRow>
+          <StyledDashHR />
           <StyledResultRow>
             <StyledResultChartBox>
-              <Radar data={readingChartData} options={readingChartOptions} datasetKeyProvider={datasetKeyProvider} />
+              <Radar data={exerciseChartData} options={exerciseChartOption} datasetKeyProvider={datasetKeyProvider} />
             </StyledResultChartBox>
             <StyledResultTextBox>
               <StyledResultTextTitle>Exercise Training</StyledResultTextTitle>
               <StyledResultText>
                 <span>
-                  읽기 과정의 핵심 시선이동인 도약안구운동(saccade)을 빠르고 정확하게 훈련합니다. 시선추적장치를
+                  &nbsp;읽기 과정의 핵심 시선이동인 도약안구운동(saccade)을 빠르고 정확하게 훈련합니다. 시선추적장치를
                   활용합니다.
                 </span>
                 <ul>
@@ -803,14 +1002,24 @@ const StyledWrapper = styled.div`
   margin-bottom: 2em;
 `;
 
+const StyledHeaderTitle = styled.h2`
+  font-size: 1.6em;
+
+  @media screen and (min-width: 800px) {
+    font-size: 1.8em;
+  }
+`;
+
 const StyledReport = styled.div`
   width: 100%;
+  max-width: 1024px;
   margin: 0;
   padding: 1em;
   font-size: 62.5%; // 16px -> 10px
   position: relative;
-  color: #333;
+  color: #464555;
   transition: 0.2s;
+  user-select: none;
 
   &,
   & * {
@@ -841,7 +1050,6 @@ const StyledMainTitle = styled.h2`
     font-size: 2.5em;
   }
 `;
-
 const StyledDueTitle = styled.h3`
   margin: 5px 0;
   font-size: 1.4em;
@@ -904,7 +1112,7 @@ const StyledChartBox = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 2px solid #333;
+  border: 1px solid #aaa9bc;
 `;
 
 const StyledChartTitle = styled.h3`
@@ -917,18 +1125,20 @@ const StyledChartTitle = styled.h3`
   margin: 0;
 `;
 const StyledChart = styled.div`
-  width: 100%;
-  height: calc(100% - 30px);
+  width: calc(100% - 1em);
+  height: calc(100% - 30px - 1.5em);
+  margin: 0.5em;
+  margin-bottom: 1em;
 `;
 
 const StyledGridWrapper = styled(StyledWrapper)``;
-const StyledGridTitle = styled.h2``;
+const StyledGridTitle = styled(StyledHeaderTitle)``;
 const StyledGrid = styled.div`
   display: grid;
-  grid-template-rows: repeat(16, 1fr);
+  grid-template-rows: repeat(17, 1fr);
   grid-template-columns: 1fr;
-  border-top: 1px solid #333;
-  border-left: 1px solid #333;
+  border-top: 1px solid #ada9bb;
+  border-left: 1px solid #ada9bb;
   border-collapse: collapse;
 `;
 
@@ -959,8 +1169,8 @@ const StyledGridRow = styled.div<GridProps>`
 const StyledGridCell = styled.div<GridProps>`
   height: 100%;
   padding: 0.5em 0;
-  border-right: 1px solid #333;
-  border-bottom: 1px solid #333;
+  border-right: 1px solid #ada9bb;
+  border-bottom: 1px solid #ada9bb;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -971,7 +1181,7 @@ const StyledGridCell = styled.div<GridProps>`
       ? css`
           font-size: 1.2em;
           font-weight: 700;
-          background: #cecece;
+          background: #eeedff;
           @media screen and (min-width: 1024px) {
             font-size: 1.4em;
           }
@@ -995,14 +1205,15 @@ const StyledResultWrapper = styled(StyledWrapper)`
   flex-direction: column;
   gap: 1em;
 `;
-const StyledResultTitle = styled.h2``;
+const StyledResultTitle = styled(StyledHeaderTitle)``;
 const StyledResultRow = styled.div`
   width: 100%;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 1em;
+  gap: 2em;
+  margin-top: 1em;
 `;
 const StyledResultChartBox = styled.div`
   display: flex;
@@ -1010,11 +1221,12 @@ const StyledResultChartBox = styled.div`
   padding: 5px;
   min-width: 300px;
   height: 300px;
-  border: 2px solid #f7f7f7;
+  border: 2px solid #f0f0f0;
 `;
 const StyledResultTextBox = styled.div`
   flex: 1;
   min-width: 300px;
+  padding: 0 0.5em;
 `;
 const StyledResultTextTitle = styled.div`
   height: 30px;
@@ -1022,6 +1234,7 @@ const StyledResultTextTitle = styled.div`
   align-items: center;
   font-size: 1.4em;
   font-weight: 700;
+  margin-bottom: 0.5em;
 
   @media screen and (min-width: 700px) {
     font-size: 1.6em;
@@ -1046,4 +1259,11 @@ const StyledResultText = styled.div`
   @media screen and (min-width: 1024px) {
     font-size: 1.7em;
   }
+`;
+
+const StyledDashHR = styled.hr`
+  margin: 1em 0;
+  border: 0;
+
+  border-top: 1px solid #aaa9bc;
 `;
