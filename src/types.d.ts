@@ -69,3 +69,9 @@ interface ReportType {
     ExerciseVJump: number;
   };
 }
+
+interface TrainingReportProps {
+  medal: string;
+  tier: string;
+  data: ReportType;
+}
