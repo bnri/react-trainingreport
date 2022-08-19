@@ -100,7 +100,7 @@ const TrainingReport: React.FC<TrainingReportProps> = ({ medal, tier, data }) =>
       return;
     }
 
-    return "수행량이 부족해요";
+    return data.ratioTitle;
   }, [data]);
 
   const ratioChartData = useMemo(() => {
@@ -137,7 +137,7 @@ const TrainingReport: React.FC<TrainingReportProps> = ({ medal, tier, data }) =>
         display: true,
         text: ratioChartTitle,
         color: "#464555",
-        fontSize: 14,
+        fontSize: 16,
         fontFamily: "'FontAwesome','Helvetica Neue', 'Helvetica', 'Arial', sans-serif", //
       },
       plugins: {
@@ -176,7 +176,7 @@ const TrainingReport: React.FC<TrainingReportProps> = ({ medal, tier, data }) =>
       return;
     }
 
-    return "조금 어려워요";
+    return data.scoreTitle;
   }, [data]);
 
   const avgScoreChartData = useMemo(() => {
@@ -211,7 +211,7 @@ const TrainingReport: React.FC<TrainingReportProps> = ({ medal, tier, data }) =>
         display: true,
         text: avgScoreChartTitle,
         color: "#464555",
-        fontSize: 14,
+        fontSize: 16,
         fontFamily: "'FontAwesome','Helvetica Neue', 'Helvetica', 'Arial', sans-serif", //
       },
       plugins: {
@@ -250,7 +250,7 @@ const TrainingReport: React.FC<TrainingReportProps> = ({ medal, tier, data }) =>
       return;
     }
 
-    return "너무 많아요";
+    return data.durationTitle;
   }, [data]);
 
   const avgDurationChartData = useMemo(() => {
@@ -285,7 +285,7 @@ const TrainingReport: React.FC<TrainingReportProps> = ({ medal, tier, data }) =>
         display: true,
         text: avgDurationChartTitle,
         color: "#464555",
-        fontSize: 14,
+        fontSize: 16,
         fontFamily: "'FontAwesome','Helvetica Neue', 'Helvetica', 'Arial', sans-serif", //
       },
       plugins: {

@@ -22,6 +22,10 @@ const App: React.FC = () => {
       avgScore: 59, // 평균 수행 점수
       avgDuration: 31, // 일 평균 수행 시간
 
+      ratioTitle: "수행이 많이 미흡해요",
+      scoreTitle: "어려워요",
+      durationTitle: "수행량이 너무 많아요",
+
       trainingList: [
         {
           type: "SentenceMask",

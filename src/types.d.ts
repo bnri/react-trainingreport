@@ -43,8 +43,13 @@ interface ReportType {
   dueScore: number; // 기간 내의 점수
 
   performedRatio: number; // 전체 수행률
+  ratioTitle: string;
+
   avgScore: number; // 평균 수행 점수
+  scoreTitle: string;
+
   avgDuration: number; // 일 평균 수행 시간
+  durationTitle: string;
 
   trainingList: TrainingType[];
   groupScoreList: {
