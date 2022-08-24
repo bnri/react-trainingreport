@@ -50,10 +50,11 @@
     "node": ">= 14"
   },
   "dependencies": {
-    "styled-components": "^5.3.5",
-    "typescript": "^4.7.2",
-    "chartjs-plugin-doughnutlabel": "^2.0.3",
     "chart.js": "^2.9.4",
-    "react-chartjs-2": "^2.11.1"
+    "chartjs-plugin-doughnutlabel": "^2.0.3",
+    "dayjs": "^1.11.5",
+    "react-chartjs-2": "^2.11.1",
+    "styled-components": "^5.3.5",
+    "typescript": "^4.7.2"
   }
 }

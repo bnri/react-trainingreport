@@ -4,157 +4,107 @@ import "./App.css";
 import TrainingReport from "./components/TrainingReport";
 
 const App: React.FC = () => {
-  const dummyReportData: ReportType = useMemo(() => {
+  const dummyTrainingData = useMemo<TrainingListType>(() => {
     return {
-      agencyID: "jeong",
-      agencyName: "연광컴퓨터학원",
-      testeeID: "p002",
-      testeeNickname: "홍길동",
-      startdate: "2022-07-01", // 기준 시작일
-      enddate: "2022-07-31", // 기준 종료일
-
-      season: 3,
-      quarterScore: 44322, // 분기 누적점수(리포트 버튼을 누르는 그 순간의 점수)
-      quarterRank: 2, // 분기 누적순위(학원내에서)
-      dueScore: 2405, // 기간 내의 점수
-
-      performedRatio: 67, // 전체 수행률
-      avgScore: 59, // 평균 수행 점수
-      avgDuration: 31, // 일 평균 수행 시간
-
-      ratioTitle: "수행이 많이 미흡해요",
-      scoreTitle: "어려워요",
-      durationTitle: "수행량이 너무 많아요",
-
-      trainingList: [
+      userInfo: {
+        agency_ID: "jeong",
+        agency_name: "jeong.",
+        testee_nickname: "홍길동",
+        testee_idx: 1699,
+        user_ID: "p002",
+        start_date: "2022-08-01",
+        end_date: "2022-08-24",
+        language: "한국어",
+      },
+      taskList: [
         {
-          type: "SentenceMask",
-          level: 6,
-          language: "한국어",
-          reculsiveCount: 3,
-          weeklyPerformedDays: 5,
-          performedCount: 23,
-          needPerformedCount: 45,
-          performedRatio: 23 / 45,
-          totDuration: 5341 / 60,
-          avgScore: 75.5832,
-          totScore: 851,
+          task_dayofweek: "월,화,수,목,금",
+          task_enddate: "2022-08-19",
+          task_generatedate: "2022-08-05",
+          task_language: "한국어",
+          task_level: 6,
+          task_reculsivecount: 2,
+          task_startdate: "2022-08-05",
+          task_type: "SentenceTracking",
+          testee_idx: 1699,
+          trainingtask_idx: 19566,
         },
         {
-          type: "WordOrdering",
-          level: 6,
-          language: "한국어",
-          reculsiveCount: 3,
-          weeklyPerformedDays: 5,
-          performedCount: 23,
-          needPerformedCount: 45,
-          performedRatio: 23 / 45,
-          totDuration: 5341 / 60,
-          avgScore: 92.5832,
-          totScore: 851,
+          task_dayofweek: "월,화,수,목,금",
+          task_enddate: "2022-08-18",
+          task_generatedate: "2022-08-05",
+          task_language: "한국어",
+          task_level: 6,
+          task_reculsivecount: 3,
+          task_startdate: "2022-08-04",
+          task_type: "VisualCounting",
+          testee_idx: 1699,
+          trainingtask_idx: 19565,
         },
         {
-          type: "KeywordFinding",
-          level: 7,
-          language: "한국어",
-          reculsiveCount: 2,
-          weeklyPerformedDays: 4,
-          performedCount: 10,
-          needPerformedCount: 32,
-          performedRatio: 10 / 32,
-          totDuration: 3323 / 60,
-          avgScore: 88.1423,
-          totScore: 851.818,
+          task_dayofweek: null,
+          task_enddate: null,
+          task_generatedate: null,
+          task_language: null,
+          task_level: null,
+          task_reculsivecount: null,
+          task_startdate: null,
+          task_type: null,
+          testee_idx: 2089,
+          trainingtask_idx: null,
         },
         {
-          type: "CategoryFinding",
-          level: 7,
-          language: "한국어",
-          reculsiveCount: 2,
-          weeklyPerformedDays: 4,
-          performedCount: 10,
-          needPerformedCount: 32,
-          performedRatio: 10 / 32,
-          totDuration: 3323 / 60,
-          avgScore: 86.1423,
-          totScore: 851.818,
-        },
-        {
-          type: "TMT",
-          level: 6,
-          language: "한국어",
-          reculsiveCount: 3,
-          weeklyPerformedDays: 5,
-          performedCount: 15,
-          needPerformedCount: 45,
-          performedRatio: 15 / 45,
-          totDuration: 3000 / 60,
-          avgScore: 85.1582,
-          totScore: 951.341,
-        },
-        {
-          type: "SaccadeTracking",
-          level: 8,
-          language: "한국어",
-          reculsiveCount: 2,
-          weeklyPerformedDays: 2,
-          performedCount: 9,
-          needPerformedCount: 16,
-          performedRatio: 9 / 16,
-          totDuration: 550 / 60,
-          avgScore: 75.412,
-          totScore: 845.964,
-        },
-        {
-          type: "SentenceTracking",
-          level: 3,
-          language: "한국어",
-          reculsiveCount: 2,
-          weeklyPerformedDays: 2,
-          performedCount: 7,
-          needPerformedCount: 16,
-          performedRatio: 7 / 16,
-          totDuration: 417 / 60,
-          avgScore: 90,
-          totScore: 420,
-        },
-        {
-          type: "ExerciseHorizontal",
-          level: 6,
-          language: "한국어",
-          reculsiveCount: 2,
-          weeklyPerformedDays: 2,
-          performedCount: 8,
-          needPerformedCount: 16,
-          performedRatio: 8 / 16,
-          totDuration: 300 / 60,
-          avgScore: 93,
-          totScore: 93 * 8,
+          task_dayofweek: null,
+          task_enddate: null,
+          task_generatedate: null,
+          task_language: null,
+          task_level: null,
+          task_reculsivecount: null,
+          task_startdate: null,
+          task_type: null,
+          testee_idx: 3563,
+          trainingtask_idx: null,
         },
       ],
-
-      groupScoreList: {
-        performedRatio: 89,
-        avgScore: 75,
-        avgDuration: 20,
-
-        SentenceMask: 60,
-        CategoryFinding: 80,
-        KeywordFinding: 71,
-        WordOrdering: 83,
-        VisualSpan: 64,
-        VisualCounting: 57,
-        TMT: 51,
-        Stroop: 85,
-        SaccadeTracking: 91,
-        PursuitTracking: 86,
-        AntiTracking: 74,
-        SentenceTracking: 66,
-        ExerciseHorizontal: 57,
-        ExerciseVertical: 75,
-        ExerciseHJump: 81,
-        ExerciseVJump: 71,
-      },
+      resultList: [
+        {
+          testee_idx: 1699,
+          tr_accuracyrate: 0.67,
+          tr_duration: 99.424,
+          tr_startdate: "2022-08-18 10:37:28",
+          trainingresult_idx: 367762,
+          trainingtask_idx: 19566,
+        },
+      ],
+      rank: [
+        {
+          score_rank: 1,
+          testee_idx: 1699,
+          testee_traingscore_idx: 1590,
+          tts_count: 20,
+          tts_score: 1167,
+          tts_season: 3,
+          tts_year: 2022,
+        },
+        {
+          score_rank: 4,
+          testee_idx: 2089,
+          testee_traingscore_idx: null,
+          tts_count: null,
+          tts_score: null,
+          tts_season: null,
+          tts_year: null,
+        },
+        {
+          score_rank: 4,
+          testee_idx: 3563,
+          testee_traingscore_idx: null,
+          tts_count: null,
+          tts_score: null,
+          tts_season: null,
+          tts_year: null,
+        },
+      ],
     };
   }, []);
 
@@ -168,7 +118,7 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
-      <TrainingReport medal={MEDAL_IMG} tier={TIER} data={dummyReportData} />
+      <TrainingReport medal={MEDAL_IMG} tier={TIER} trainingData={dummyTrainingData} />
     </div>
   );
 };
