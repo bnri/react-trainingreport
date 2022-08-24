@@ -107,18 +107,9 @@ const App: React.FC = () => {
       ],
     };
   }, []);
-
-  const MEDAL_IMG = useMemo(() => {
-    return "https://readerseye-lite-neutral.s3.ap-northeast-2.amazonaws.com/img/public/training/bronze_1.png";
-  }, []);
-
-  const TIER = useMemo(() => {
-    return "브론즈";
-  }, []);
-
   return (
     <div className="App">
-      <TrainingReport medal={MEDAL_IMG} tier={TIER} trainingData={dummyTrainingData} />
+      <TrainingReport trainingData={dummyTrainingData} />
     </div>
   );
 };

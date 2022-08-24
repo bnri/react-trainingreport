@@ -137,7 +137,5 @@ interface testeeList {
 }
 
 interface TrainingReportProps {
-  medal: string;
-  tier: string;
   trainingData: TrainingListType;
 }

@@ -48,10 +48,9 @@ const makeTrainingList = (language: "한국어" | "영어") => {
   return typenameList.map((t) => makeTrainingObject(t, language));
 };
 
-const TrainingReport: React.FC<TrainingReportProps> = ({ medal, tier, trainingData }) => {
+const TrainingReport: React.FC<TrainingReportProps> = ({ trainingData }) => {
   const [isMobileWidth, setIsMobileWidth] = useState<boolean>(false);
   const [data, setData] = useState<ReportType>();
-
   useEffect(() => {
     const resize = () => {
       const width = window.innerWidth;
@@ -952,7 +951,43 @@ const TrainingReport: React.FC<TrainingReportProps> = ({ medal, tier, trainingDa
     };
   }, [resultChartTitle, exerciseChartData, commonResultChartOption]);
 
-  if (!data) {
+  const tier = useMemo(() => {
+    if (!data) {
+      return;
+    }
+
+    if (data.quarterScore >= 80000) {
+      return "다이아몬드";
+    } else if (data.quarterScore >= 40000) {
+      return "플래티넘";
+    } else if (data.quarterScore >= 15000) {
+      return "골드";
+    } else if (data.quarterScore >= 5000) {
+      return "실버";
+    } else {
+      return "브론즈";
+    }
+  }, [data]);
+
+  const medal = useMemo(() => {
+    if (!tier) {
+      return;
+    }
+
+    if (tier === "다이아몬드") {
+      return "https://readerseye-lite-neutral.s3.ap-northeast-2.amazonaws.com/img/public/training/diamond.png";
+    } else if (tier === "플래티넘") {
+      return "https://readerseye-lite-neutral.s3.ap-northeast-2.amazonaws.com/img/public/training/platinum_1.png";
+    } else if (tier === "골드") {
+      return "https://readerseye-lite-neutral.s3.ap-northeast-2.amazonaws.com/img/public/training/gold_1.png";
+    } else if (tier === "실버") {
+      return "https://readerseye-lite-neutral.s3.ap-northeast-2.amazonaws.com/img/public/training/silver_1.png";
+    } else {
+      return "https://readerseye-lite-neutral.s3.ap-northeast-2.amazonaws.com/img/public/training/bronze_1.png";
+    }
+  }, [tier]);
+
+  if (!data || !tier || !medal) {
     return <></>;
   }
 
