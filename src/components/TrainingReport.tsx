@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
 import { Doughnut, Radar } from "react-chartjs-2";
 import "chartjs-plugin-doughnutlabel";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
+import PDF from "../lib/pdf";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -48,9 +49,30 @@ const makeTrainingList = (language: "한국어" | "영어") => {
   return typenameList.map((t) => makeTrainingObject(t, language));
 };
 
-const TrainingReport: React.FC<TrainingReportProps> = ({ trainingData }) => {
+export interface ImperativeType {
+  isPossibleMakePDF: () => boolean;
+  generatePDF: () => Promise<void>;
+}
+
+const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ trainingData }, ref) => {
   const [isMobileWidth, setIsMobileWidth] = useState<boolean>(false);
   const [data, setData] = useState<ReportType>();
+
+  useImperativeHandle(ref, () => ({
+    isPossibleMakePDF: () => Boolean(data),
+    generatePDF: () => {
+      return new Promise(async (resolve, reject) => {
+        if (!data) {
+          reject("data invalid");
+          return;
+        }
+        const pdf = new PDF(data);
+        const response = await pdf.start();
+        resolve();
+      });
+    },
+  }));
+
   useEffect(() => {
     const resize = () => {
       const width = window.innerWidth;
@@ -431,9 +453,9 @@ const TrainingReport: React.FC<TrainingReportProps> = ({ trainingData }) => {
     return {
       cutoutPercentage: 75,
       responsive: true,
-      responsiveAnimationDuration: 1200,
+      responsiveAnimationDuration: 1000,
       animation: {
-        duration: 1200,
+        duration: 1000,
       },
       maintainAspectRatio: false,
       tooltips: {
@@ -1253,7 +1275,7 @@ const TrainingReport: React.FC<TrainingReportProps> = ({ trainingData }) => {
       </StyledResultWrapper>
     </StyledReport>
   );
-};
+});
 
 export default TrainingReport;
 

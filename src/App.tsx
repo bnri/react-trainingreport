@@ -1,9 +1,11 @@
-import { useMemo } from "react";
+import ReactDOM from "react-dom";
+import { useEffect, useMemo, useRef } from "react";
 
 import "./App.css";
-import TrainingReport from "./components/TrainingReport";
+import TrainingReport, { ImperativeType } from "./components/TrainingReport";
 
 const App: React.FC = () => {
+  const ref = useRef<ImperativeType>(null);
   const dummyTrainingData = useMemo<TrainingListType>(() => {
     return {
       userInfo: {
@@ -107,9 +109,20 @@ const App: React.FC = () => {
       ],
     };
   }, []);
+
+  useEffect(() => {
+    if (!ref || !ref.current) {
+      return;
+    }
+    console.log("isPossibleMakePDF", ref.current.isPossibleMakePDF());
+    const t = setTimeout(() => console.log("isPossibleMakePDF12412", ref?.current?.isPossibleMakePDF()), 500);
+
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <div className="App">
-      <TrainingReport trainingData={dummyTrainingData} />
+      <TrainingReport ref={ref} trainingData={dummyTrainingData} />
     </div>
   );
 };
