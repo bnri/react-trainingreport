@@ -6,6 +6,8 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import PDF from "../lib/pdf";
+import { ReportType, testeeList, TrainingReportProps, TrainingType, typenames } from "../types";
+import { imgbase64forPDF } from "../lib/base64";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -51,24 +53,64 @@ const makeTrainingList = (language: "한국어" | "영어") => {
 
 export interface ImperativeType {
   isPossibleMakePDF: () => boolean;
-  generatePDF: () => Promise<void>;
+  generatePDF: () => Promise<boolean>;
+  downloadPDF: () => Promise<boolean>;
 }
 
 const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ trainingData }, ref) => {
   const [isMobileWidth, setIsMobileWidth] = useState<boolean>(false);
   const [data, setData] = useState<ReportType>();
+  const [pdf, setPdf] = useState<PDF>();
+
+  const tier = useMemo(() => {
+    if (!data) {
+      return;
+    }
+
+    if (data.quarterScore >= 80000) {
+      return "다이아몬드";
+    } else if (data.quarterScore >= 40000) {
+      return "플래티넘";
+    } else if (data.quarterScore >= 15000) {
+      return "골드";
+    } else if (data.quarterScore >= 5000) {
+      return "실버";
+    } else {
+      return "브론즈";
+    }
+  }, [data]);
+
+  const medal = useMemo(() => {
+    if (!tier) {
+      return;
+    }
+
+    return imgbase64forPDF[tier];
+  }, [tier]);
 
   useImperativeHandle(ref, () => ({
     isPossibleMakePDF: () => Boolean(data),
     generatePDF: () => {
       return new Promise(async (resolve, reject) => {
-        if (!data) {
+        if (!data || !tier) {
           reject("data invalid");
           return;
         }
-        const pdf = new PDF(data);
+        const pdf = new PDF(data, null, tier);
         const response = await pdf.start();
-        resolve();
+        setPdf(pdf);
+        resolve(response);
+      });
+    },
+    downloadPDF: () => {
+      return new Promise(async (resolve, reject) => {
+        if (!pdf) {
+          resolve(false);
+          return;
+        }
+
+        const response = await pdf.download();
+        resolve(response);
       });
     },
   }));
@@ -97,6 +139,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
       testeeIdx: trainingData.userInfo.testee_idx,
       testeeID: trainingData.userInfo.user_ID,
       testeeNickname: trainingData.userInfo.testee_nickname,
+      testeeClass: trainingData.userInfo.testee_class,
       startdate: trainingData.userInfo.start_date,
       enddate: trainingData.userInfo.end_date,
     };
@@ -524,12 +567,10 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
       datasets: [
         {
           data: [data.performedRatio, 100 - data.performedRatio],
-          // backgroundColor: ["#1EACFF", "transparent"],
           backgroundColor: ["#009bde", "transparent"],
         },
         {
           data: [data.groupScoreList.performedRatio, 100 - data.groupScoreList.performedRatio],
-          // backgroundColor: ["#06D5AC", "transparent"],
           backgroundColor: ["#ada9bb", "transparent"],
         },
       ],
@@ -973,42 +1014,6 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
     };
   }, [resultChartTitle, exerciseChartData, commonResultChartOption]);
 
-  const tier = useMemo(() => {
-    if (!data) {
-      return;
-    }
-
-    if (data.quarterScore >= 80000) {
-      return "다이아몬드";
-    } else if (data.quarterScore >= 40000) {
-      return "플래티넘";
-    } else if (data.quarterScore >= 15000) {
-      return "골드";
-    } else if (data.quarterScore >= 5000) {
-      return "실버";
-    } else {
-      return "브론즈";
-    }
-  }, [data]);
-
-  const medal = useMemo(() => {
-    if (!tier) {
-      return;
-    }
-
-    if (tier === "다이아몬드") {
-      return "https://readerseye-lite-neutral.s3.ap-northeast-2.amazonaws.com/img/public/training/diamond.png";
-    } else if (tier === "플래티넘") {
-      return "https://readerseye-lite-neutral.s3.ap-northeast-2.amazonaws.com/img/public/training/platinum_1.png";
-    } else if (tier === "골드") {
-      return "https://readerseye-lite-neutral.s3.ap-northeast-2.amazonaws.com/img/public/training/gold_1.png";
-    } else if (tier === "실버") {
-      return "https://readerseye-lite-neutral.s3.ap-northeast-2.amazonaws.com/img/public/training/silver_1.png";
-    } else {
-      return "https://readerseye-lite-neutral.s3.ap-northeast-2.amazonaws.com/img/public/training/bronze_1.png";
-    }
-  }, [tier]);
-
   if (!data || !tier || !medal) {
     return <></>;
   }
@@ -1041,19 +1046,30 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         <StyledChartBox>
           <StyledChartTitle>수행률</StyledChartTitle>
           <StyledChart>
-            <Doughnut data={ratioChartData} options={ratioChartOptions} datasetKeyProvider={datasetKeyProvider} />
+            <Doughnut
+              id="RatioChart"
+              data={ratioChartData}
+              options={ratioChartOptions}
+              datasetKeyProvider={datasetKeyProvider}
+            />
           </StyledChart>
         </StyledChartBox>
         <StyledChartBox>
           <StyledChartTitle>평균 수행 점수</StyledChartTitle>
           <StyledChart>
-            <Doughnut data={avgScoreChartData} options={avgScoreChartOptions} datasetKeyProvider={datasetKeyProvider} />
+            <Doughnut
+              id="AvgScoreChart"
+              data={avgScoreChartData}
+              options={avgScoreChartOptions}
+              datasetKeyProvider={datasetKeyProvider}
+            />
           </StyledChart>
         </StyledChartBox>
         <StyledChartBox>
           <StyledChartTitle>일 평균 수행 시간</StyledChartTitle>
           <StyledChart>
             <Doughnut
+              id="AvgDurationChart"
               data={avgDurationChartData}
               options={avgDurationChartOptions}
               datasetKeyProvider={datasetKeyProvider}
@@ -1194,7 +1210,12 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         <StyledResultTitle>개별 Training 수행 결과</StyledResultTitle>
         <StyledResultRow>
           <StyledResultChartBox>
-            <Radar data={readingChartData} options={readingChartOptions} datasetKeyProvider={datasetKeyProvider} />
+            <Radar
+              id="ReadingChart"
+              data={readingChartData}
+              options={readingChartOptions}
+              datasetKeyProvider={datasetKeyProvider}
+            />
           </StyledResultChartBox>
           <StyledResultTextBox>
             <StyledResultTextTitle>Reading Training</StyledResultTextTitle>
@@ -1215,7 +1236,12 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         <StyledDashHR />
         <StyledResultRow>
           <StyledResultChartBox>
-            <Radar data={cognitiveChartData} options={cognitiveChartOption} datasetKeyProvider={datasetKeyProvider} />
+            <Radar
+              id="CognitiveChart"
+              data={cognitiveChartData}
+              options={cognitiveChartOption}
+              datasetKeyProvider={datasetKeyProvider}
+            />
           </StyledResultChartBox>
           <StyledResultTextBox>
             <StyledResultTextTitle>Cognitive Training</StyledResultTextTitle>
@@ -1233,7 +1259,12 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         <StyledDashHR />
         <StyledResultRow>
           <StyledResultChartBox>
-            <Radar data={trackingChartData} options={trackingChartOption} datasetKeyProvider={datasetKeyProvider} />
+            <Radar
+              id="TrackingChart"
+              data={trackingChartData}
+              options={trackingChartOption}
+              datasetKeyProvider={datasetKeyProvider}
+            />
           </StyledResultChartBox>
           <StyledResultTextBox>
             <StyledResultTextTitle>Tracking Training</StyledResultTextTitle>
@@ -1254,7 +1285,12 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         <StyledDashHR />
         <StyledResultRow>
           <StyledResultChartBox>
-            <Radar data={exerciseChartData} options={exerciseChartOption} datasetKeyProvider={datasetKeyProvider} />
+            <Radar
+              id="ExerciseChart"
+              data={exerciseChartData}
+              options={exerciseChartOption}
+              datasetKeyProvider={datasetKeyProvider}
+            />
           </StyledResultChartBox>
           <StyledResultTextBox>
             <StyledResultTextTitle>Exercise Training</StyledResultTextTitle>

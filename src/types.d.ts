@@ -1,4 +1,4 @@
-type typenames =
+export type typenames =
   | "SentenceMask"
   | "CategoryFinding"
   | "KeywordFinding"
@@ -16,7 +16,7 @@ type typenames =
   | "ExerciseHJump"
   | "ExerciseVJump";
 
-interface TrainingType {
+export interface TrainingType {
   type: typenames;
   level: number;
   language?: "한국어" | "영어";
@@ -32,13 +32,14 @@ interface TrainingType {
   equalTypeCount: number; // 이 type이 지금 몇 개 나왔는지
 }
 
-interface ReportType {
+export interface ReportType {
   agencyID: string;
   agencyName: string;
 
   testeeIdx: number;
   testeeID: string;
   testeeNickname: string;
+  testeeClass: string;
 
   startdate: string; // 기준 시작일
   enddate: string; // 기준 종료일
@@ -81,18 +82,19 @@ interface ReportType {
   };
 }
 
-interface UserInfoType {
+export interface UserInfoType {
   agency_ID: string;
   agency_name: string;
   testee_nickname: string;
   testee_idx: number;
+  testee_class: string;
   user_ID: string;
   start_date: string;
   end_date: string;
   language: "한국어" | "영어";
 }
 
-interface TaskListType {
+export interface TaskListType {
   task_dayofweek: string | null;
   task_enddate: string | null;
   task_generatedate: string | null;
@@ -105,7 +107,7 @@ interface TaskListType {
   trainingtask_idx: number | null; // 얘가 null이면 idx 제외하고 다 null임
 }
 
-interface ResultListType {
+export interface ResultListType {
   testee_idx: number;
   tr_accuracyrate: number;
   tr_duration: number;
@@ -114,7 +116,7 @@ interface ResultListType {
   trainingtask_idx: number;
 }
 
-interface RankType {
+export interface RankType {
   score_rank: number;
   testee_idx: number;
   testee_traingscore_idx: number | null;
@@ -124,18 +126,18 @@ interface RankType {
   tts_year: number | null;
 }
 
-interface TrainingListType {
+export interface TrainingListType {
   userInfo: UserInfoType;
   taskList: TaskListType[];
   resultList: ResultListType[];
   rank: RankType[];
 }
 
-interface testeeList {
+export interface testeeList {
   testeeIdx: number;
   trainingList: TrainingType[];
 }
 
-interface TrainingReportProps {
+export interface TrainingReportProps {
   trainingData: TrainingListType;
 }

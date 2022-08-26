@@ -9,5 +9,7 @@
 !dist/styles/**/*.js
 !dist/util/**/*.d.ts
 !dist/util/**/*.js
+!dist/lib/**/*.d.ts
+!dist/lib/**/*.js
 !dist/index.d.ts
 !dist/types.d.ts
