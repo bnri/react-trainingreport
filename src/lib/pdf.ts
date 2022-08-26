@@ -131,6 +131,121 @@ pdfMake.tableLayouts = {
   },
 };
 
+// @ts-ignore
+function findInlineHeight(cell, maxWidth, usedWidth = 0) {
+  function mapTableBodies(innerTableCell: any) {
+    // @ts-ignore
+    const findInlineHeight = this.findInlineHeight(innerTableCell, maxWidth, usedWidth);
+
+    usedWidth = findInlineHeight.width;
+    return findInlineHeight.height;
+  }
+  // @ts-ignore
+  let calcLines = (inlines) => {
+    if (!inlines)
+      return {
+        height: 0,
+        width: 0,
+      };
+    let currentMaxHeight = 0;
+    let lastHadLineEnd = false;
+    for (const currentNode of inlines) {
+      usedWidth += currentNode.width;
+      if (usedWidth > maxWidth || lastHadLineEnd) {
+        currentMaxHeight += currentNode.height;
+        usedWidth = currentNode.width;
+      } else {
+        currentMaxHeight = Math.max(currentNode.height, currentMaxHeight);
+      }
+      lastHadLineEnd = !!currentNode.lineEnd;
+    }
+    return {
+      height: currentMaxHeight,
+      width: usedWidth,
+    };
+  };
+  if (cell._offsets) {
+    usedWidth += cell._offsets.total;
+  }
+  if (cell._inlines && cell._inlines.length) {
+    return calcLines(cell._inlines);
+  } else if (cell.stack && cell.stack[0]) {
+    return (
+      cell.stack
+        // @ts-ignore
+        .map((item) => {
+          return findInlineHeight(item, maxWidth);
+        })
+        // @ts-ignore
+        .reduce((prev, next) => {
+          return {
+            height: prev.height + next.height,
+            width: Math.max(prev.width + next.width),
+          };
+        })
+    );
+  } else if (cell.table) {
+    let currentMaxHeight = 0;
+    for (const currentTableBodies of cell.table.body) {
+      const innerTableHeights = currentTableBodies.map(mapTableBodies);
+      currentMaxHeight = Math.max(...innerTableHeights, currentMaxHeight);
+    }
+    return {
+      height: currentMaxHeight,
+      width: usedWidth,
+    };
+  } else if (cell._height) {
+    usedWidth += cell._width;
+    return {
+      height: cell._height,
+      width: usedWidth,
+    };
+  }
+
+  return {
+    height: null,
+    width: usedWidth,
+  };
+}
+// @ts-ignore
+function applyVerticalAlignment(node, rowIndex, align, manualHeight = 0) {
+  // New default argument
+  const allCellHeights = node.table.body[rowIndex].map(
+    // @ts-ignore
+    (innerNode, columnIndex) => {
+      const mFindInlineHeight = findInlineHeight(innerNode, node.table.widths[columnIndex]._calcWidth);
+      return mFindInlineHeight.height;
+    }
+  );
+  // @ts-ignore
+  const maxRowHeight = manualHeight ? manualHeight[rowIndex] : Math.max(...allCellHeights); // handle manual height
+  // @ts-ignore
+  node.table.body[rowIndex].forEach((cell, ci) => {
+    if (allCellHeights[ci] && maxRowHeight > allCellHeights[ci]) {
+      let topMargin;
+
+      let cellAlign = align;
+      if (Array.isArray(align)) {
+        cellAlign = align[ci];
+      }
+
+      if (cellAlign === "bottom") {
+        topMargin = maxRowHeight - allCellHeights[ci];
+      } else if (cellAlign === "center") {
+        topMargin = (maxRowHeight - allCellHeights[ci]) / 2;
+      }
+
+      if (topMargin) {
+        if (cell._margin) {
+          cell._margin[1] = topMargin;
+        } else {
+          cell._margin = [0, topMargin, 0, 0];
+        }
+      }
+    }
+  });
+}
+
 export default class PDF {
   pdf: pdfMake.TCreatedPdf | null;
   doc: TDocumentDefinitions | null;
@@ -159,6 +274,7 @@ export default class PDF {
         subject: "리더스아이 트레이닝 수행리포트",
         keywords: "",
       },
+      pageMargins: [20, 40, 20, 20],
       background: (currentPage, pageCount) => {
         if (currentPage * 1 === 1) {
           return [
@@ -384,8 +500,14 @@ export default class PDF {
         },
         tableHeader: {
           bold: true,
-          fontSize: 12,
+          fontSize: 9,
           color: "black",
+          alignment: "center",
+        },
+        tableItem: {
+          fontSize: 9,
+          color: "black",
+          alignment: "center",
         },
         tableParagraph: {
           bold: false,
@@ -481,6 +603,7 @@ export default class PDF {
         },
       },
       {
+        margin: [0, 5, 0, 5],
         table: {
           widths: ["1%", "32%", "1%", "32%", "1%", "32%", "1%"],
           heights: [160],
@@ -523,6 +646,52 @@ export default class PDF {
               { text: ``, border: [false] },
             ],
           ],
+        },
+        layout: {
+          hLineColor: (i, node) => "#aaa9bc",
+          vLineColor: (i, node) => "#aaa9bc",
+        },
+      },
+      { text: `개별 Training 수행 결과`, fontSize: 13, bold: true, margin: [0, 10, 0, 10] },
+      {
+        table: {
+          widths: ["20%", "7%", "8%", "auto", "auto", "auto", "8%", "auto", "auto", "auto"],
+          heights: Array(17).fill(15),
+          headerRows: 1,
+          body: [
+            [
+              { text: "할당된 과제", style: "tableHeader" },
+              { text: "레벨", style: "tableHeader" },
+              { text: "언어", style: "tableHeader" },
+              { text: "일 수행횟수", style: "tableHeader" },
+              { text: "주당 수행일", style: "tableHeader" },
+              { text: "총 수행횟수", style: "tableHeader" },
+              { text: "수행률", style: "tableHeader" },
+              { text: "총 수행시간", style: "tableHeader" },
+              { text: "평균 점수", style: "tableHeader" },
+              { text: "총 획득점수", style: "tableHeader" },
+            ],
+            [{ style: "tableItem", text: "Sentence Mask" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Word Ordering" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Keyword Finding" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Category Finding" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Visual Span" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Visual Counting" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "TMT" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Stroop" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Saccade Tracking" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Pursuit Tracking" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Anti Tracking" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Sentence Tracking" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Exercise Horizontal" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Exercise Vertical" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Exercise HJump" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+            [{ style: "tableItem", text: "Exercise VJump" }, ...Array(9).fill({ style: "tableItem", text: "a" })],
+          ],
+        },
+        layout: {
+          hLineColor: (i, node) => "#aaa9bc",
+          vLineColor: (i, node) => "#aaa9bc",
         },
       },
     ];

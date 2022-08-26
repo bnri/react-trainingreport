@@ -568,10 +568,14 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         {
           data: [data.performedRatio, 100 - data.performedRatio],
           backgroundColor: ["#009bde", "transparent"],
+          borderWidth: 0,
+          hoverBorderWidth: 0,
         },
         {
           data: [data.groupScoreList.performedRatio, 100 - data.groupScoreList.performedRatio],
           backgroundColor: ["#ada9bb", "transparent"],
+          borderWidth: 0,
+          hoverBorderWidth: 0,
         },
       ],
     };
@@ -642,10 +646,14 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         {
           data: [data.avgScore, 100 - data.avgScore],
           backgroundColor: ["#009bde", "transparent"],
+          borderWidth: 0,
+          hoverBorderWidth: 0,
         },
         {
           data: [data.groupScoreList.avgScore, 100 - data.groupScoreList.avgScore],
           backgroundColor: ["#ada9bb", "transparent"],
+          borderWidth: 0,
+          hoverBorderWidth: 0,
         },
       ],
     };
@@ -716,10 +724,14 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         {
           data: [data.avgDuration, 100 - data.avgDuration],
           backgroundColor: ["#009bde", "transparent"],
+          borderWidth: 0,
+          hoverBorderWidth: 0,
         },
         {
           data: [data.groupScoreList.avgDuration, 100 - data.groupScoreList.avgDuration],
           backgroundColor: ["#ada9bb", "transparent"],
+          borderWidth: 0,
+          hoverBorderWidth: 0,
         },
       ],
     };
