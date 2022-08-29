@@ -2,17 +2,36 @@ import { ReportType } from "./../types.d";
 import { imgbase64forPDF } from "./base64";
 import pdfMake from "pdfmake/build/pdfmake";
 // @ts-ignore
-import pdfFonts from "./vfs_fonts_jejumj_gd_cn";
+// import pdfFonts from "./vfs_fonts_jejumj_gd_cn";
 import { Content, TDocumentDefinitions } from "pdfmake/interfaces";
+import React from "react";
 
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
-pdfMake.fonts = {
-  제주명조: {
-    normal: "jejumyungjo.ttf",
-    bold: "jejugothic.ttf",
-    italics: "cjk.ttf",
-  },
+// @ts-ignore
+const ReactLazyPreload = (importStatement) => {
+  // @ts-ignore
+  const Component = React.lazy(importStatement);
+  // @ts-ignore
+  Component.preload = importStatement;
+  return Component;
 };
+
+export let preloadDone = false;
+// @ts-ignore
+const pdfFonts = ReactLazyPreload(() => import("./vfs_fonts_jejumj_gd_cn"));
+// @ts-ignore
+pdfFonts.preload().then((res) => {
+  pdfMake.vfs = res.pdfMake.vfs;
+  pdfMake.fonts = {
+    제주명조: {
+      normal: "jejumyungjo.ttf",
+      bold: "jejugothic.ttf",
+      italics: "cjk.ttf",
+    },
+  };
+  preloadDone = true;
+});
+
+// pdfMake.vfs = pdfFonts.pdfMake.vfs;
 pdfMake.tableLayouts = {
   showblackline: {
     hLineWidth: function (i, node) {
@@ -118,14 +137,6 @@ pdfMake.tableLayouts = {
       return "#1A408E";
     },
   },
-};
-
-const delay = (ms: number) => {
-  return new Promise((resolve) =>
-    setTimeout(() => {
-      resolve(true);
-    }, ms)
-  );
 };
 
 export default class PDF {
@@ -650,8 +661,6 @@ export default class PDF {
         throw new Error("chart not found");
       }
 
-      await delay(1500);
-
       const readingChartSrc = readingChart.toDataURL();
       const cognitiveChartSrc = cognitiveChart.toDataURL();
       const trackingChartSrc = trackingChart.toDataURL();
@@ -878,10 +887,14 @@ export default class PDF {
   };
 
   start: () => Promise<boolean> = () => {
-    return new Promise(async (resolve) => {
+    return new Promise((resolve) => {
+      if (!preloadDone) {
+        console.log("preloadDone is false");
+        resolve(false);
+      }
       const a = this.makeFirstPage();
       const b = this.makeSecondPage();
-      const c = await this.makeThirdPage();
+      const c = this.makeThirdPage();
 
       if (!a || !b || !c) {
         console.log(a, b, c);

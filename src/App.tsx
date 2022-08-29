@@ -4,8 +4,6 @@ import "./App.css";
 import TrainingReport, { ImperativeType } from "./components/TrainingReport";
 import { dummyTrainingData } from "./dummy";
 
-console.log("process.env", process.env);
-
 const App: React.FC = () => {
   const ref = useRef<ImperativeType>(null);
 
@@ -17,6 +15,7 @@ const App: React.FC = () => {
             return;
           }
           const isPossible = ref.current.isPossibleMakePDF();
+
           if (isPossible) {
             ref.current.generatePDF().then((res) => {
               console.log("generate done", res);

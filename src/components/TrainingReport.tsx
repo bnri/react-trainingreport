@@ -5,7 +5,7 @@ import "chartjs-plugin-doughnutlabel";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import PDF from "../lib/pdf";
+import PDF, { preloadDone } from "../lib/pdf";
 import { ReportType, testeeList, TrainingReportProps, TrainingType, typenames } from "../types";
 import { imgbase64forPDF } from "../lib/base64";
 
@@ -89,7 +89,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
   }, [tier]);
 
   useImperativeHandle(ref, () => ({
-    isPossibleMakePDF: () => Boolean(data),
+    isPossibleMakePDF: () => preloadDone && Boolean(data),
     generatePDF: () => {
       return new Promise(async (resolve, reject) => {
         if (!data || !tier) {
