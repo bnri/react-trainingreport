@@ -35,6 +35,7 @@ export interface TrainingType {
 export interface ReportType {
   agencyID: string;
   agencyName: string;
+  agencyLogo?: string;
 
   testeeIdx: number;
   testeeID: string;
@@ -92,6 +93,7 @@ export interface UserInfoType {
   start_date: string;
   end_date: string;
   language: "한국어" | "영어";
+  agency_logo?: string;
 }
 
 export interface TaskListType {

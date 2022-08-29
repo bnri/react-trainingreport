@@ -132,19 +132,15 @@ export default class PDF {
   pdf: pdfMake.TCreatedPdf | null;
   doc: TDocumentDefinitions | null;
   data: ReportType;
-  agencyLogo: string | null;
+  agencyLogo?: string;
   tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈";
 
-  constructor(
-    data: ReportType,
-    agencyLogo: string | null,
-    tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈"
-  ) {
+  constructor(data: ReportType, tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈", agencyLogo?: string) {
     this.pdf = null;
     this.doc = null;
     this.data = data;
-    this.agencyLogo = agencyLogo;
     this.tier = tier;
+    this.agencyLogo = agencyLogo;
   }
 
   makeFirstPage = () => {

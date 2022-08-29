@@ -96,7 +96,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
           reject("data invalid");
           return;
         }
-        const pdf = new PDF(data, null, tier);
+        const pdf = new PDF(data, tier, data.agencyLogo);
         const response = await pdf.start();
         setPdf(pdf);
         resolve(response);
@@ -142,6 +142,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
       testeeClass: trainingData.userInfo.testee_class,
       startdate: trainingData.userInfo.start_date,
       enddate: trainingData.userInfo.end_date,
+      agencyLogo: trainingData.userInfo.agency_logo,
     };
     // testee별로 묶기
     // task별로 묶기
