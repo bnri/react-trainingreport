@@ -530,12 +530,12 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         align: "start",
       },
       scale: {
-        angleLines: {
-          display: false,
-        },
         ticks: {
-          suggestedMin: 0,
-          suggestedMax: 100,
+          beginAtZero: true,
+          max: 100,
+          min: 0,
+          stepSize: 20,
+          backdropColor: "transparent",
         },
       },
       plugins: {
@@ -1167,17 +1167,17 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
                   {t}
                 </StyledGridCell>
                 <StyledGridCell order={1} isMobileWidth={isMobileWidth}>
-                  {find.level}
+                  {parseFloat(find.level.toFixed(2))}
                 </StyledGridCell>
                 <StyledGridCell order={3} isMobileWidth={isMobileWidth}>
-                  {find.reculsiveCount}회
+                  {parseFloat(find.reculsiveCount.toFixed(2))}회
                 </StyledGridCell>
                 <StyledGridCell
                   order={4}
                   isMobileWidth={isMobileWidth}
                   style={{ display: isMobileWidth ? "none" : "flex" }}
                 >
-                  {find.weeklyPerformedDays}일
+                  {parseFloat(find.weeklyPerformedDays.toFixed(2))}일
                 </StyledGridCell>
                 <StyledGridCell order={6} isMobileWidth={isMobileWidth}>
                   {parseFloat((find.performedRatio * 100).toFixed(2))}%
@@ -1263,7 +1263,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
                 <li>Visual Span : 순간적으로 제시되는 무의미한 글자들을 한 눈에 최대한 많이 기억해야 합니다.</li>
                 <li>Visual Counting : 순간적으로 제시되는 점의 개수를 패턴화하여 세야 합니다.</li>
                 <li>Trail Making Test(TMT) : 어지럽게 배치된 숫자와 문자들을 순서대로 빠르게 연결해야 합니다.</li>
-                <li>Stroop Teste : 제시되는 문장의 내용과 색깔을 비교하여 빠르게 판단해야 합니다.</li>
+                <li>Stroop Test : 제시되는 문장의 내용과 색깔을 비교하여 빠르게 판단해야 합니다.</li>
               </ul>
             </StyledResultText>
           </StyledResultTextBox>
@@ -1551,6 +1551,7 @@ const StyledResultChartBox = styled.div`
   min-width: 300px;
   height: 300px;
   border: 2px solid #f0f0f0;
+  flex: 1;
 `;
 const StyledResultTextBox = styled.div`
   flex: 1;
