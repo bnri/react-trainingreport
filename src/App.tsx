@@ -28,7 +28,7 @@ const App: React.FC = () => {
               });
             });
           } else {
-            console.log("pdf 객체 생성 실패");
+            console.log("잠시 후 다시 시도해주세요.");
           }
         }}
       >
