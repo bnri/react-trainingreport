@@ -78,8 +78,6 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
     } else {
       return "브론즈";
     }
-
-    return "브론즈";
   }, [data]);
 
   const medal = useMemo(() => {
