@@ -480,6 +480,10 @@ export default class PDF {
         "Exercise VJump",
       ];
 
+      const firstScoreText = `${this.data.firstScore.toLocaleString()}점(${this.data.firstScoreDate} 이후, ${
+        this.tier
+      }, ${this.data.firstScoreRank}위)`;
+
       this.doc.content = [
         ...(this.doc.content as Content[]),
         {
@@ -503,7 +507,7 @@ export default class PDF {
         {
           table: {
             widths: ["80%", "20%"],
-            heights: [20, 20, 20, 20],
+            heights: [15, 15, 15, 15, 15, 15],
             headerRows: 0,
             body: [
               [
@@ -517,14 +521,26 @@ export default class PDF {
                   fontSize: 12,
                   border: [false],
                 },
-                { rowSpan: 3, image: "메달", width: 40, height: 60, alignment: "center", border: [false] },
+                { rowSpan: 5, image: "메달", width: 47.25, height: 75, alignment: "center", border: [false] },
               ],
               [
                 {
-                  text: `${this.data.season}분기 누적점수 : ${this.data.quarterScore.toLocaleString()}점(${
-                    this.tier
-                  }, ${this.data.quarterRank}위)`,
+                  text: `총 누적점수 : ${this.data.totScore.toLocaleString()}점`,
 
+                  fontSize: 12,
+                  border: [false],
+                },
+              ],
+              [
+                {
+                  text: `기록 1 : ${firstScoreText}`,
+                  fontSize: 12,
+                  border: [false],
+                },
+              ],
+              [
+                {
+                  text: `기록 2 : ${this.data.secondScore.toLocaleString()}점(${this.data.secondScoreDate} 이후)`,
                   fontSize: 12,
                   border: [false],
                 },

@@ -83,31 +83,34 @@ export const dummyTrainingData: TrainingListType = {
   ],
   rank: [
     {
-      score_rank: 1,
       testee_idx: 1699,
-      testee_traingscore_idx: 1590,
-      tts_count: 20,
-      tts_score: 4000,
-      tts_season: 3,
-      tts_year: 2022,
+      testee_newtraingscore_idx: 1590,
+      tts_totalscore: 1000,
+      tts_firstscore: 8000,
+      tts_firstscore_resetdate: "2022-10-01 22:22:22",
+      tts_firstscore_rank: 1,
+      tts_secondscore: 500,
+      tts_secondscore_resetdate: "2022-10-01 22:22:22",
     },
     {
-      score_rank: 4,
       testee_idx: 2089,
-      testee_traingscore_idx: null,
-      tts_count: null,
-      tts_score: null,
-      tts_season: null,
-      tts_year: null,
+      testee_newtraingscore_idx: null,
+      tts_totalscore: 800,
+      tts_firstscore: 300,
+      tts_firstscore_resetdate: "2022-10-01 22:22:22",
+      tts_firstscore_rank: 4,
+      tts_secondscore: 300,
+      tts_secondscore_resetdate: "2022-10-01 22:22:22",
     },
     {
-      score_rank: 4,
       testee_idx: 3563,
-      testee_traingscore_idx: null,
-      tts_count: null,
-      tts_score: null,
-      tts_season: null,
-      tts_year: null,
+      testee_newtraingscore_idx: null,
+      tts_totalscore: 670,
+      tts_firstscore: 300,
+      tts_firstscore_resetdate: "2022-10-01 22:22:22",
+      tts_firstscore_rank: 4,
+      tts_secondscore: 300,
+      tts_secondscore_resetdate: "2022-10-01 22:22:22",
     },
   ],
 };
@@ -122,9 +125,16 @@ export const dummyReportData: ReportType = {
   startdate: "2022-07-01", // 기준 시작일
   enddate: "2022-07-31", // 기준 종료일
 
-  season: 3,
-  quarterScore: 44322, // 분기 누적점수(리포트 버튼을 누르는 그 순간의 점수)
-  quarterRank: 2, // 분기 누적순위(학원내에서)
+  // season: 3,
+  // quarterScore: 44322, // 분기 누적점수(리포트 버튼을 누르는 그 순간의 점수)
+  // quarterRank: 2, // 분기 누적순위(학원내에서)
+  totScore: 1000, // 총점
+  firstScore: 500, // 기록1
+  firstScoreRank: 1,
+  firstScoreDate: "2022-10-01",
+  secondScore: 500, // 기록2
+  secondScoreDate: "2022-10-01",
+
   dueScore: 2405, // 기간 내의 점수
 
   performedRatio: 67, // 전체 수행률

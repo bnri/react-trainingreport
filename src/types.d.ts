@@ -45,9 +45,13 @@ export interface ReportType {
   startdate: string; // 기준 시작일
   enddate: string; // 기준 종료일
 
-  season: 0 | 1 | 2 | 3 | 4;
-  quarterScore: number; // 분기 누적점수(리포트 버튼을 누르는 그 순간의 점수)
-  quarterRank: number; // 분기 누적순위(학원내에서)
+  totScore: number; // 총점
+  firstScore: number; // 기록1
+  firstScoreRank: number;
+  firstScoreDate: string;
+  secondScore: number; // 기록2
+  secondScoreDate: string;
+
   dueScore: number; // 기간 내의 점수
 
   performedRatio: number; // 전체 수행률
@@ -119,13 +123,14 @@ export interface ResultListType {
 }
 
 export interface RankType {
-  score_rank: number;
   testee_idx: number;
-  testee_traingscore_idx: number | null;
-  tts_count: number | null;
-  tts_score: number | null;
-  tts_season: 0 | 1 | 2 | 3 | 4 | null;
-  tts_year: number | null;
+  testee_newtraingscore_idx: number | null;
+  tts_totalscore: number | null;
+  tts_firstscore: number | null;
+  tts_firstscore_resetdate: string;
+  tts_firstscore_rank: number | null;
+  tts_secondscore: number | null;
+  tts_secondscore_resetdate: string;
 }
 
 export interface TrainingListType {

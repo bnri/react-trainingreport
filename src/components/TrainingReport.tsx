@@ -67,17 +67,19 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
       return;
     }
 
-    if (data.quarterScore >= 80000) {
+    if (data.firstScore >= 80000) {
       return "다이아몬드";
-    } else if (data.quarterScore >= 40000) {
+    } else if (data.firstScore >= 40000) {
       return "플래티넘";
-    } else if (data.quarterScore >= 15000) {
+    } else if (data.firstScore >= 15000) {
       return "골드";
-    } else if (data.quarterScore >= 5000) {
+    } else if (data.firstScore >= 5000) {
       return "실버";
     } else {
       return "브론즈";
     }
+
+    return "브론즈";
   }, [data]);
 
   const medal = useMemo(() => {
@@ -319,13 +321,16 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
     const testeeScore = trainingData.rank.find((f) => f.testee_idx === trainingData.userInfo.testee_idx);
 
     if (!testeeScore) {
-      resultData.season = 0;
-      resultData.quarterScore = 0;
-      resultData.quarterRank = 0;
+      resultData.totScore = 0;
+      resultData.firstScore = 0;
+      resultData.secondScore = 0;
     } else {
-      resultData.season = testeeScore.tts_season || 0;
-      resultData.quarterScore = testeeScore.tts_score || 0;
-      resultData.quarterRank = testeeScore.score_rank || 0;
+      resultData.totScore = testeeScore.tts_totalscore || 0;
+      resultData.firstScore = testeeScore.tts_firstscore || 0;
+      resultData.firstScoreRank = testeeScore.tts_firstscore_rank || 0;
+      resultData.firstScoreDate = dayjs(testeeScore.tts_firstscore_resetdate).format("YYYY-MM-DD");
+      resultData.secondScore = testeeScore.tts_secondscore || 0;
+      resultData.secondScoreDate = dayjs(testeeScore.tts_secondscore_resetdate).format("YYYY-MM-DD");
     }
 
     // testeeList에서 내꺼 찾아서 넣어주기
@@ -344,13 +349,14 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
     const totPerformedCount = resultData.trainingList.reduce((prev, curr) => prev + curr.performedCount, 0); // 수행한 횟수 총합
     const totNeedPerformedCount = resultData.trainingList.reduce((prev, curr) => prev + curr.needPerformedCount, 0); // 해야하는 횟수 총합
     const totAvgScore = resultData.trainingList.reduce((prev, curr) => prev + curr.avgScore, 0);
-    const performedRatio = +(totPerformedCount / totNeedPerformedCount).toFixed(2) * 100; // 전체 수행률
-    const avgScore = +(totAvgScore / trainingLength).toFixed(2); // 평균 수행 점수
+    const performedRatio = +(totPerformedCount / (totNeedPerformedCount || 1)).toFixed(2) * 100; // 전체 수행률
+    const avgScore = +(totAvgScore / (trainingLength || 1)).toFixed(2); // 평균 수행 점수
     const avgDuration = +(
-      resultData.trainingList.reduce((prev, curr) => prev + curr.totDuration, 0) / trainingLength
+      resultData.trainingList.reduce((prev, curr) => prev + curr.totDuration, 0) / (trainingLength || 1)
     ).toFixed(2); // 기간 내의 점수?
     const dueScore = +resultData.trainingList.reduce((prev, curr) => prev + curr.totScore, 0).toFixed(0); // 기간 내의 점수?
 
+    // resultData.performedRatio = performedRatio;
     resultData.performedRatio = performedRatio;
     resultData.avgScore = avgScore;
     resultData.avgDuration = avgDuration; // 평균 수행시간
@@ -415,9 +421,9 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
       const testeeAvgScore = currActiveTraining.reduce((prev, curr) => prev + curr.avgScore, 0);
       const testeeAvgDuration = currActiveTraining.reduce((prev, curr) => prev + curr.totDuration, 0);
 
-      totGroupPerformedRatio += +(testeePerformedCount / testeeNeedPerformedCount).toFixed(2);
-      totGroupAvgScore += +(testeeAvgScore / currActiveTraining.length).toFixed(2); // 평균 수행 점수
-      totGroupAvgDuration += +(testeeAvgDuration / currActiveTraining.length).toFixed(2);
+      totGroupPerformedRatio += +(testeePerformedCount / (testeeNeedPerformedCount || 1)).toFixed(2);
+      totGroupAvgScore += +(testeeAvgScore / (currActiveTraining.length || 1)).toFixed(2); // 평균 수행 점수
+      totGroupAvgDuration += +(testeeAvgDuration / (currActiveTraining.length || 1)).toFixed(2);
 
       currActiveTraining.forEach((t) => {
         groupTypeObject[t.type].score += t.avgScore;
@@ -451,13 +457,13 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
       if (groupTypeObject[key].cnt === 0) {
         groupTrainingTypeAvgScore[key] = 0;
       } else {
-        groupTrainingTypeAvgScore[key] = groupTypeObject[key].score / groupTypeObject[key].cnt;
+        groupTrainingTypeAvgScore[key] = groupTypeObject[key].score / (groupTypeObject[key].cnt || 1);
       }
     }
 
-    totGroupPerformedRatio = +(totGroupPerformedRatio / testeeList.length).toFixed(2) * 100;
-    totGroupAvgScore = +(totGroupAvgScore / testeeList.length).toFixed(2);
-    totGroupAvgDuration = +(totGroupAvgDuration / testeeList.length).toFixed(2);
+    totGroupPerformedRatio = +(totGroupPerformedRatio / (testeeList.length || 1)).toFixed(2) * 100;
+    totGroupAvgScore = +(totGroupAvgScore / (testeeList.length || 1)).toFixed(2);
+    totGroupAvgDuration = +(totGroupAvgDuration / (testeeList.length || 1)).toFixed(2);
 
     const groupScoreList = {
       performedRatio: totGroupPerformedRatio,
@@ -601,7 +607,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         doughnutlabel: {
           labels: [
             {
-              text: `${data.performedRatio}%`,
+              text: `${parseFloat(data.performedRatio.toFixed(2))}%`,
               font: {
                 size: "24",
               },
@@ -1035,21 +1041,26 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
     <StyledReport id="report">
       <StyledTitleBox id="reportTitle">
         <StyledMainTitle>
-          {data?.testeeNickname}({data?.testeeID})의 리더스아이 트레이닝 수행리포트
+          {data.testeeNickname}({data.testeeID})의 리더스아이 트레이닝 수행리포트
         </StyledMainTitle>
         <StyledDueTitle>
-          {data?.startdate} ~ {data?.enddate}
+          {data.startdate} ~ {data.enddate}
         </StyledDueTitle>
       </StyledTitleBox>
       <StyledInfoBox id="reportInfo">
         <StyledInfoLeftBox>
           <StyledInfoText>
-            수행 기관 : {data?.agencyName}({data?.agencyID})
+            수행 기관 : {data.agencyName}({data.agencyID})
+          </StyledInfoText>
+          <StyledInfoText>총 누적점수 : {data.totScore.toLocaleString()}점</StyledInfoText>
+          <StyledInfoText>
+            기록 1 : {data.firstScore.toLocaleString()}점({data.firstScoreDate} 이후, {tier}, {data.firstScoreRank || 1}
+            위)
           </StyledInfoText>
           <StyledInfoText>
-            {data?.season}분기 누적점수 : {data?.quarterScore.toLocaleString()}점({tier}, {data?.quarterRank}위)
+            기록 2 : {data.secondScore.toLocaleString()}점({data.secondScoreDate} 이후)
           </StyledInfoText>
-          <StyledInfoText>기간 내 총 획득 점수 : {data?.dueScore.toLocaleString()}점</StyledInfoText>
+          <StyledInfoText>기간 내 총 획득 점수 : {data.dueScore.toLocaleString()}점</StyledInfoText>
         </StyledInfoLeftBox>
         <StyledInfoRightBox>
           <img src={medal} alt="Medal" />
@@ -1131,7 +1142,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
             </StyledGridCell>
           </StyledGridRow>
           {trainingTypes.map((t, i) => {
-            const find = data?.trainingList.find((f) => f.type === t.split(" ").join(""));
+            const find = data.trainingList.find((f) => f.type === t.split(" ").join(""));
 
             if (!find) {
               return (
@@ -1409,7 +1420,7 @@ const StyledInfoLeftBox = styled.div`
 `;
 
 const StyledInfoText = styled.span`
-  height: 33.33333%;
+  height: 20%;
   display: flex;
   align-items: center;
 `;
