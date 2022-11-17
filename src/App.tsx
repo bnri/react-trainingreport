@@ -2,7 +2,7 @@ import { useRef } from "react";
 
 import "./App.css";
 import TrainingReport, { ImperativeType } from "./components/TrainingReport";
-import { dummyTrainingData } from "./dummy";
+import { NewDummy } from "./dummy";
 
 const App: React.FC = () => {
   const ref = useRef<ImperativeType>(null);
@@ -34,7 +34,7 @@ const App: React.FC = () => {
       >
         go
       </button>
-      <TrainingReport ref={ref} trainingData={dummyTrainingData} />
+      {/* <TrainingReport ref={ref} trainingData={NewDummy} /> */}
     </div>
   );
 };

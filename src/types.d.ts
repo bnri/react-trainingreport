@@ -16,6 +16,26 @@ export type typenames =
   | "ExerciseHJump"
   | "ExerciseVJump";
 
+export type taskNames =
+  | "SentenceMask"
+  | "CategoryFinding"
+  | "KeywordFinding"
+  | "WordOrdering"
+  | "VisualSpan"
+  | "VisualCounting"
+  | "TMT"
+  | "Stroop"
+  | "SaccadeTracking"
+  | "PursuitTracking"
+  | "AntiTracking"
+  | "SentenceTracking"
+  | "ExerciseHorizontal"
+  | "ExerciseVertical"
+  | "ExerciseHJump"
+  | "ExerciseVJump";
+
+export type taskTypes = "Reading" | "Cognitive" | "Tracking" | "Exercise";
+
 export interface TrainingType {
   type: typenames;
   level: number;
@@ -147,4 +167,55 @@ export interface testeeList {
 
 export interface TrainingReportProps {
   trainingData: TrainingListType;
+}
+
+export interface TrainingResultType {
+  testee_task_idx: number;
+  tr_accuracyrate: number;
+  tr_duration: number;
+  tr_feeling?: string;
+  tr_score: number;
+  tr_starttime: string;
+  trainingresult_idx: number;
+  trainingtext_idx?: number;
+}
+
+export interface TaskType {
+  dayofweek: string;
+  isactive: number;
+  language: "한국어" | "영어" | "중국어";
+  level: number;
+  reculsivecount: number;
+  task_name: taskNames;
+  task_type: taskTypes;
+  testee_task_idx: number;
+  trainingResult: { [key: string]: TrainingResultType[] };
+}
+
+export interface TesteeType {
+  ItsMe: boolean;
+  agency_ID: string;
+  agency_name: string;
+  rank: number;
+  taskList: [];
+  testeeTaskIdxList: number[];
+  testee_idx: number;
+  testee_nickname: string;
+  tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈";
+  tts_firstscore: number;
+  tts_firstscore_resetdate: string;
+  tts_secondscore: number;
+  tts_secondscore_resetdate: string;
+  tts_monthscore: number;
+  tts_totalscore: number;
+  user_ID: string;
+}
+
+export interface ReportProps {
+  data: TesteeType[];
+  meIndex: number;
+  info: {
+    start_date: string;
+    end_date: string;
+  };
 }
