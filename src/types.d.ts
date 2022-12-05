@@ -197,10 +197,11 @@ export interface TesteeType {
   agency_ID: string;
   agency_name: string;
   rank: number;
-  taskList: [];
+  taskList: TaskType[];
   testeeTaskIdxList: number[];
   testee_idx: number;
   testee_nickname: string;
+  testee_class: string;
   tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈";
   tts_firstscore: number;
   tts_firstscore_resetdate: string;
@@ -209,6 +210,7 @@ export interface TesteeType {
   tts_monthscore: number;
   tts_totalscore: number;
   user_ID: string;
+  agency_logo: string;
 }
 
 export interface ReportProps {

@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import PDF, { preloadDone } from "../lib/pdf";
-import { ReportType, testeeList, TrainingReportProps, TrainingType, typenames } from "../types";
+import { ReportProps, ReportType, testeeList, TrainingType, typenames } from "../types";
 import { imgbase64forPDF } from "../lib/base64";
 
 dayjs.extend(utc);
@@ -57,7 +57,8 @@ export interface ImperativeType {
   downloadPDF: () => Promise<boolean>;
 }
 
-const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ trainingData }, ref) => {
+const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
+  const { data: trainingData, meIndex, info } = props;
   const [isMobileWidth, setIsMobileWidth] = useState<boolean>(false);
   const [data, setData] = useState<ReportType>();
   const [pdf, setPdf] = useState<PDF>();
@@ -134,15 +135,15 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
 
     // @ts-ignore;
     const resultData: ReportType = {
-      agencyID: trainingData.userInfo.agency_ID,
-      agencyName: trainingData.userInfo.agency_name,
-      testeeIdx: trainingData.userInfo.testee_idx,
-      testeeID: trainingData.userInfo.user_ID,
-      testeeNickname: trainingData.userInfo.testee_nickname,
-      testeeClass: trainingData.userInfo.testee_class,
-      startdate: trainingData.userInfo.start_date,
-      enddate: trainingData.userInfo.end_date,
-      agencyLogo: trainingData.userInfo.agency_logo,
+      agencyID: trainingData[meIndex].agency_ID,
+      agencyName: trainingData[meIndex].agency_name,
+      testeeIdx: trainingData[meIndex].testee_idx,
+      testeeID: trainingData[meIndex].user_ID,
+      testeeNickname: trainingData[meIndex].testee_nickname,
+      testeeClass: trainingData[meIndex].testee_class,
+      startdate: info.start_date,
+      enddate: info.end_date,
+      agencyLogo: trainingData[meIndex].agency_logo,
     };
     // testee별로 묶기
     // task별로 묶기
@@ -174,13 +175,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
       let trainingList = null;
       let findTesteeIndex = null;
 
-      if (
-        !curr.trainingtask_idx ||
-        !curr.task_type ||
-        !curr.task_dayofweek ||
-        curr.task_reculsivecount === null ||
-        curr.task_level === null
-      ) {
+      if (!curr.trainingtask_idx || !curr.task_type || !curr.task_dayofweek || curr.task_reculsivecount === null || curr.task_level === null) {
         // 과제가 없음
         return prev;
       } else {
@@ -349,9 +344,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
     const totAvgScore = resultData.trainingList.reduce((prev, curr) => prev + curr.avgScore, 0);
     const performedRatio = +(totPerformedCount / (totNeedPerformedCount || 1)).toFixed(2) * 100; // 전체 수행률
     const avgScore = +(totAvgScore / (trainingLength || 1)).toFixed(2); // 평균 수행 점수
-    const avgDuration = +(
-      resultData.trainingList.reduce((prev, curr) => prev + curr.totDuration, 0) / (trainingLength || 1)
-    ).toFixed(2); // 기간 내의 점수?
+    const avgDuration = +(resultData.trainingList.reduce((prev, curr) => prev + curr.totDuration, 0) / (trainingLength || 1)).toFixed(2); // 기간 내의 점수?
     const dueScore = +resultData.trainingList.reduce((prev, curr) => prev + curr.totScore, 0).toFixed(0); // 기간 내의 점수?
 
     // resultData.performedRatio = performedRatio;
@@ -474,27 +467,10 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
     resultData.groupScoreList = groupScoreList;
 
     setData(resultData);
-  }, [trainingData]);
+  }, [trainingData, meIndex, info]);
 
   const trainingTypes = useMemo(() => {
-    return [
-      "Sentence Mask",
-      "Word Ordering",
-      "Keyword Finding",
-      "Category Finding",
-      "Visual Span",
-      "Visual Counting",
-      "TMT",
-      "Stroop",
-      "Saccade Tracking",
-      "Pursuit Tracking",
-      "Anti Tracking",
-      "Sentence Tracking",
-      "Exercise Horizontal",
-      "Exercise Vertical",
-      "Exercise HJump",
-      "Exercise VJump",
-    ];
+    return ["Sentence Mask", "Word Ordering", "Keyword Finding", "Category Finding", "Visual Span", "Visual Counting", "TMT", "Stroop", "Saccade Tracking", "Pursuit Tracking", "Anti Tracking", "Sentence Tracking", "Exercise Horizontal", "Exercise Vertical", "Exercise HJump", "Exercise VJump"];
   }, []);
 
   const commonChartOption = useMemo(() => {
@@ -811,24 +787,14 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
       datasets: [
         {
           label: "Me",
-          data: [
-            (sm && sm.avgScore) || 0,
-            (wo && wo.avgScore) || 0,
-            (kf && kf.avgScore) || 0,
-            (cf && cf.avgScore) || 0,
-          ],
+          data: [(sm && sm.avgScore) || 0, (wo && wo.avgScore) || 0, (kf && kf.avgScore) || 0, (cf && cf.avgScore) || 0],
           borderColor: "#009bde",
           backgroundColor: "#009bde",
           fill: false,
         },
         {
           label: "Group",
-          data: [
-            data.groupScoreList.SentenceMask || 0,
-            data.groupScoreList.WordOrdering || 0,
-            data.groupScoreList.KeywordFinding || 0,
-            data.groupScoreList.CategoryFinding || 0,
-          ],
+          data: [data.groupScoreList.SentenceMask || 0, data.groupScoreList.WordOrdering || 0, data.groupScoreList.KeywordFinding || 0, data.groupScoreList.CategoryFinding || 0],
           borderColor: "#ada9bb",
           backgroundColor: "#ada9bb",
           fill: false,
@@ -870,24 +836,14 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
       datasets: [
         {
           label: "Me",
-          data: [
-            (vs && vs.avgScore) || 0,
-            (vc && vc.avgScore) || 0,
-            (tmt && tmt.avgScore) || 0,
-            (st && st.avgScore) || 0,
-          ],
+          data: [(vs && vs.avgScore) || 0, (vc && vc.avgScore) || 0, (tmt && tmt.avgScore) || 0, (st && st.avgScore) || 0],
           borderColor: "#009bde",
           backgroundColor: "#009bde",
           fill: false,
         },
         {
           label: "Group",
-          data: [
-            data.groupScoreList.VisualSpan || 0,
-            data.groupScoreList.VisualCounting || 0,
-            data.groupScoreList.TMT || 0,
-            data.groupScoreList.Stroop || 0,
-          ],
+          data: [data.groupScoreList.VisualSpan || 0, data.groupScoreList.VisualCounting || 0, data.groupScoreList.TMT || 0, data.groupScoreList.Stroop || 0],
           borderColor: "#ada9bb",
           backgroundColor: "#ada9bb",
           fill: false,
@@ -929,24 +885,14 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
       datasets: [
         {
           label: "Me",
-          data: [
-            (st && st.avgScore) || 0,
-            (pt && pt.avgScore) || 0,
-            (at && at.avgScore) || 0,
-            (set && set.avgScore) || 0,
-          ],
+          data: [(st && st.avgScore) || 0, (pt && pt.avgScore) || 0, (at && at.avgScore) || 0, (set && set.avgScore) || 0],
           borderColor: "#009bde",
           backgroundColor: "#009bde",
           fill: false,
         },
         {
           label: "Group",
-          data: [
-            data.groupScoreList.SaccadeTracking || 0,
-            data.groupScoreList.PursuitTracking || 0,
-            data.groupScoreList.AntiTracking || 0,
-            data.groupScoreList.SentenceTracking || 0,
-          ],
+          data: [data.groupScoreList.SaccadeTracking || 0, data.groupScoreList.PursuitTracking || 0, data.groupScoreList.AntiTracking || 0, data.groupScoreList.SentenceTracking || 0],
           borderColor: "#ada9bb",
           backgroundColor: "#ada9bb",
           fill: false,
@@ -988,24 +934,14 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
       datasets: [
         {
           label: "Me",
-          data: [
-            (eh && eh.avgScore) || 0,
-            (ev && ev.avgScore) || 0,
-            (ehj && ehj.avgScore) || 0,
-            (evj && evj.avgScore) || 0,
-          ],
+          data: [(eh && eh.avgScore) || 0, (ev && ev.avgScore) || 0, (ehj && ehj.avgScore) || 0, (evj && evj.avgScore) || 0],
           borderColor: "#009bde",
           backgroundColor: "#009bde",
           fill: false,
         },
         {
           label: "Group",
-          data: [
-            data.groupScoreList.ExerciseHorizontal || 0,
-            data.groupScoreList.ExerciseVertical || 0,
-            data.groupScoreList.ExerciseHJump || 0,
-            data.groupScoreList.ExerciseVJump || 0,
-          ],
+          data: [data.groupScoreList.ExerciseHorizontal || 0, data.groupScoreList.ExerciseVertical || 0, data.groupScoreList.ExerciseHJump || 0, data.groupScoreList.ExerciseVJump || 0],
           borderColor: "#ada9bb",
           backgroundColor: "#ada9bb",
           fill: false,
@@ -1068,34 +1004,19 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         <StyledChartBox>
           <StyledChartTitle>수행률</StyledChartTitle>
           <StyledChart>
-            <Doughnut
-              id="RatioChart"
-              data={ratioChartData}
-              options={ratioChartOptions}
-              datasetKeyProvider={datasetKeyProvider}
-            />
+            <Doughnut id="RatioChart" data={ratioChartData} options={ratioChartOptions} datasetKeyProvider={datasetKeyProvider} />
           </StyledChart>
         </StyledChartBox>
         <StyledChartBox>
           <StyledChartTitle>평균 수행 점수</StyledChartTitle>
           <StyledChart>
-            <Doughnut
-              id="AvgScoreChart"
-              data={avgScoreChartData}
-              options={avgScoreChartOptions}
-              datasetKeyProvider={datasetKeyProvider}
-            />
+            <Doughnut id="AvgScoreChart" data={avgScoreChartData} options={avgScoreChartOptions} datasetKeyProvider={datasetKeyProvider} />
           </StyledChart>
         </StyledChartBox>
         <StyledChartBox>
           <StyledChartTitle>일 평균 수행 시간</StyledChartTitle>
           <StyledChart>
-            <Doughnut
-              id="AvgDurationChart"
-              data={avgDurationChartData}
-              options={avgDurationChartOptions}
-              datasetKeyProvider={datasetKeyProvider}
-            />
+            <Doughnut id="AvgDurationChart" data={avgDurationChartData} options={avgDurationChartOptions} datasetKeyProvider={datasetKeyProvider} />
           </StyledChart>
         </StyledChartBox>
       </StyledChartWrapper>
@@ -1112,12 +1033,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
             <StyledGridCell order={3} header isMobileWidth={isMobileWidth}>
               일 수행횟수
             </StyledGridCell>
-            <StyledGridCell
-              order={4}
-              header
-              isMobileWidth={isMobileWidth}
-              style={{ display: isMobileWidth ? "none" : "flex" }}
-            >
+            <StyledGridCell order={4} header isMobileWidth={isMobileWidth} style={{ display: isMobileWidth ? "none" : "flex" }}>
               주당 수행일
             </StyledGridCell>
             <StyledGridCell order={6} header isMobileWidth={isMobileWidth}>
@@ -1182,11 +1098,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
                 <StyledGridCell order={3} isMobileWidth={isMobileWidth}>
                   {parseFloat(find.reculsiveCount.toFixed(2))}회
                 </StyledGridCell>
-                <StyledGridCell
-                  order={4}
-                  isMobileWidth={isMobileWidth}
-                  style={{ display: isMobileWidth ? "none" : "flex" }}
-                >
+                <StyledGridCell order={4} isMobileWidth={isMobileWidth} style={{ display: isMobileWidth ? "none" : "flex" }}>
                   {parseFloat(find.weeklyPerformedDays.toFixed(2))}일
                 </StyledGridCell>
                 <StyledGridCell order={6} isMobileWidth={isMobileWidth}>
@@ -1195,32 +1107,16 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
                 <StyledGridCell order={8} isMobileWidth={isMobileWidth}>
                   {parseFloat(find.avgScore.toFixed(2))}점
                 </StyledGridCell>
-                <StyledGridCell
-                  order={2}
-                  isMobileWidth={isMobileWidth}
-                  style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}
-                >
+                <StyledGridCell order={2} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
                   {find.language}
                 </StyledGridCell>
-                <StyledGridCell
-                  order={5}
-                  isMobileWidth={isMobileWidth}
-                  style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}
-                >
+                <StyledGridCell order={5} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
                   {isMobileWidth ? `${find.performedCount}회` : `${find.performedCount} / ${find.needPerformedCount}`}
                 </StyledGridCell>
-                <StyledGridCell
-                  order={7}
-                  isMobileWidth={isMobileWidth}
-                  style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}
-                >
+                <StyledGridCell order={7} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
                   {parseFloat(find.totDuration.toFixed(2))}분
                 </StyledGridCell>
-                <StyledGridCell
-                  order={9}
-                  isMobileWidth={isMobileWidth}
-                  style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}
-                >
+                <StyledGridCell order={9} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
                   {parseFloat(find.totScore.toFixed(2))}점
                 </StyledGridCell>
               </StyledGridRow>
@@ -1232,20 +1128,12 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         <StyledResultTitle>개별 Training 수행 결과</StyledResultTitle>
         <StyledResultRow>
           <StyledResultChartBox>
-            <Radar
-              id="ReadingChart"
-              data={readingChartData}
-              options={readingChartOptions}
-              datasetKeyProvider={datasetKeyProvider}
-            />
+            <Radar id="ReadingChart" data={readingChartData} options={readingChartOptions} datasetKeyProvider={datasetKeyProvider} />
           </StyledResultChartBox>
           <StyledResultTextBox>
             <StyledResultTextTitle>Reading Training</StyledResultTextTitle>
             <StyledResultText>
-              <span>
-                &nbsp;읽기를 기반으로 속도 제어, 안정성 향상, 문장 완성, 어휘의 탐색 및 판단 능력을 향상시키는
-                훈련입니다.
-              </span>
+              <span>&nbsp;읽기를 기반으로 속도 제어, 안정성 향상, 문장 완성, 어휘의 탐색 및 판단 능력을 향상시키는 훈련입니다.</span>
               <ul>
                 <li>Word Ordering : 뒤섞여 있는 어절들을 정상적인 문장이 되도록 순서를 맞춰야 합니다.</li>
                 <li>Sentence Mask : 일정한 속도로, 순차적으로 보여지는 글을 속도에 맞춰 읽어야 합니다.</li>
@@ -1258,12 +1146,7 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         <StyledDashHR />
         <StyledResultRow>
           <StyledResultChartBox>
-            <Radar
-              id="CognitiveChart"
-              data={cognitiveChartData}
-              options={cognitiveChartOption}
-              datasetKeyProvider={datasetKeyProvider}
-            />
+            <Radar id="CognitiveChart" data={cognitiveChartData} options={cognitiveChartOption} datasetKeyProvider={datasetKeyProvider} />
           </StyledResultChartBox>
           <StyledResultTextBox>
             <StyledResultTextTitle>Cognitive Training</StyledResultTextTitle>
@@ -1281,20 +1164,12 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         <StyledDashHR />
         <StyledResultRow>
           <StyledResultChartBox>
-            <Radar
-              id="TrackingChart"
-              data={trackingChartData}
-              options={trackingChartOption}
-              datasetKeyProvider={datasetKeyProvider}
-            />
+            <Radar id="TrackingChart" data={trackingChartData} options={trackingChartOption} datasetKeyProvider={datasetKeyProvider} />
           </StyledResultChartBox>
           <StyledResultTextBox>
             <StyledResultTextTitle>Tracking Training</StyledResultTextTitle>
             <StyledResultText>
-              <span>
-                &nbsp;읽기와 시지각의 기본이 되는 안구운동의 제어와 통제, 지각 집중력을 향상시킵니다. 시선추적장치를
-                활용하며, 게임 형식으로 진행합니다.
-              </span>
+              <span>&nbsp;읽기와 시지각의 기본이 되는 안구운동의 제어와 통제, 지각 집중력을 향상시킵니다. 시선추적장치를 활용하며, 게임 형식으로 진행합니다.</span>
               <ul>
                 <li>Saccade Tracking : 상하좌우에 나타나는 점을 빠르고 정확하게 움직여 시선을 고정시켜야 합니다.</li>
                 <li>Pursuit Tracking : 직선 또는 원운동 하는 점을 부드럽고 안정적으로 추적하며 보아야 합니다.</li>
@@ -1307,20 +1182,12 @@ const TrainingReport = forwardRef<ImperativeType, TrainingReportProps>(({ traini
         <StyledDashHR />
         <StyledResultRow>
           <StyledResultChartBox>
-            <Radar
-              id="ExerciseChart"
-              data={exerciseChartData}
-              options={exerciseChartOption}
-              datasetKeyProvider={datasetKeyProvider}
-            />
+            <Radar id="ExerciseChart" data={exerciseChartData} options={exerciseChartOption} datasetKeyProvider={datasetKeyProvider} />
           </StyledResultChartBox>
           <StyledResultTextBox>
             <StyledResultTextTitle>Exercise Training</StyledResultTextTitle>
             <StyledResultText>
-              <span>
-                &nbsp;읽기 과정의 핵심 시선이동인 도약안구운동(saccade)을 빠르고 정확하게 훈련합니다. 시선추적장치를
-                활용합니다.
-              </span>
+              <span>&nbsp;읽기 과정의 핵심 시선이동인 도약안구운동(saccade)을 빠르고 정확하게 훈련합니다. 시선추적장치를 활용합니다.</span>
               <ul>
                 <li>Horizontal Sweep : 수평방향으로 최대 폭의 시선이동을 훈련합니다.</li>
                 <li>Vertical Sweep : 수직방향으로 최대 폭의 시선이동을 훈련합니다.</li>

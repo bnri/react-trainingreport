@@ -34,7 +34,15 @@ const App: React.FC = () => {
       >
         go
       </button>
-      {/* <TrainingReport ref={ref} trainingData={NewDummy} /> */}
+      <TrainingReport
+        ref={ref}
+        data={NewDummy}
+        meIndex={0}
+        info={{
+          start_date: "2022-11-01",
+          end_date: "2022-11-30",
+        }}
+      />
     </div>
   );
 };
