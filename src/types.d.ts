@@ -198,19 +198,18 @@ export interface TesteeType {
   agency_name: string;
   rank: number;
   taskList: TaskType[];
-  testeeTaskIdxList: number[];
+  testeeTaskIdxList: { idx: number; listIdx: number }[];
   testee_idx: number;
   testee_nickname: string;
-  testee_class: string;
+  testee_class?: string;
   tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈";
-  tts_firstscore: number;
+  tts_firstscore?: number;
   tts_firstscore_resetdate: string;
-  tts_secondscore: number;
+  tts_secondscore?: number;
   tts_secondscore_resetdate: string;
-  tts_monthscore: number;
-  tts_totalscore: number;
+  tts_monthscore?: number;
+  tts_totalscore?: number;
   user_ID: string;
-  agency_logo: string;
 }
 
 export interface ReportProps {
@@ -219,5 +218,6 @@ export interface ReportProps {
   info: {
     start_date: string;
     end_date: string;
+    agency_logo?: string;
   };
 }

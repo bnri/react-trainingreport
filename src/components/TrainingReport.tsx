@@ -137,16 +137,33 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     const resultData: ReportType = {
       agencyID: trainingData[meIndex].agency_ID,
       agencyName: trainingData[meIndex].agency_name,
+      agencyLogo: info.agency_logo,
+
       testeeIdx: trainingData[meIndex].testee_idx,
       testeeID: trainingData[meIndex].user_ID,
       testeeNickname: trainingData[meIndex].testee_nickname,
-      testeeClass: trainingData[meIndex].testee_class,
+      testeeClass: trainingData[meIndex].testee_class || "",
+
       startdate: info.start_date,
       enddate: info.end_date,
-      agencyLogo: trainingData[meIndex].agency_logo,
+
+      totScore: trainingData[meIndex].tts_totalscore || 0,
+      firstScore: trainingData[meIndex].tts_firstscore || 0,
+      firstScoreDate: trainingData[meIndex].tts_firstscore_resetdate,
+      firstScoreRank: trainingData[meIndex].rank,
+
+      secondScore: trainingData[meIndex].tts_secondscore || 0,
+      secondScoreDate: trainingData[meIndex].tts_secondscore_resetdate,
+
+      dueScore: 0,
+      performedRatio: 0,
+      avgScore: 0,
+      avgDuration: 0,
     };
-    // testee별로 묶기
-    // task별로 묶기
+    let performedCount = 0;
+    let totScore = 0;
+    let totDuration = 0;
+    let count = 0;
 
     // reculsiveCount: number; // 일 수행횟수(recul)
     // weeklyPerformedDays: number; // 주당 수행일(dayofweek 개수)
@@ -166,305 +183,305 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     안한애들은 빼기
     */
 
-    let init: testeeList[] = [];
-    const testeeList = trainingData.taskList.reduce((prev, curr) => {
-      const testeeInfo = {
-        testeeIdx: curr.testee_idx,
-      };
+    // let init: testeeList[] = [];
+    // const testeeList = trainingData.taskList.reduce((prev, curr) => {
+    //   const testeeInfo = {
+    //     testeeIdx: curr.testee_idx,
+    //   };
 
-      let trainingList = null;
-      let findTesteeIndex = null;
+    //   let trainingList = null;
+    //   let findTesteeIndex = null;
 
-      if (!curr.trainingtask_idx || !curr.task_type || !curr.task_dayofweek || curr.task_reculsivecount === null || curr.task_level === null) {
-        // 과제가 없음
-        return prev;
-      } else {
-        if (curr.task_language !== trainingData.userInfo.language) {
-          // 언어가 다름
-          const nonPassTypes = ["SentenceMask", "KeywordFinding", "CategoryFinding", "WordOrdering"];
-          // 언어가 같아야만 하는 타입
-          if (nonPassTypes.includes(curr.task_type)) {
-            return prev;
-          }
-          // 그게 아니면 아래꺼 진행하면 됨
-        }
+    //   if (!curr.trainingtask_idx || !curr.task_type || !curr.task_dayofweek || curr.task_reculsivecount === null || curr.task_level === null) {
+    //     // 과제가 없음
+    //     return prev;
+    //   } else {
+    //     if (curr.task_language !== trainingData.userInfo.language) {
+    //       // 언어가 다름
+    //       const nonPassTypes = ["SentenceMask", "KeywordFinding", "CategoryFinding", "WordOrdering"];
+    //       // 언어가 같아야만 하는 타입
+    //       if (nonPassTypes.includes(curr.task_type)) {
+    //         return prev;
+    //       }
+    //       // 그게 아니면 아래꺼 진행하면 됨
+    //     }
 
-        // 과제가 있는 애들
-        if (!prev) {
-          // reduce 처음이면 trainingList가 없음
-          trainingList = makeTrainingList(trainingData.userInfo.language);
-        } else {
-          // 첫 번째 이후
-          // 이미 추가된 testee인지 확인해야함
-          findTesteeIndex = prev.findIndex((t) => t.testeeIdx === curr.testee_idx);
+    //     // 과제가 있는 애들
+    //     if (!prev) {
+    //       // reduce 처음이면 trainingList가 없음
+    //       trainingList = makeTrainingList(trainingData.userInfo.language);
+    //     } else {
+    //       // 첫 번째 이후
+    //       // 이미 추가된 testee인지 확인해야함
+    //       findTesteeIndex = prev.findIndex((t) => t.testeeIdx === curr.testee_idx);
 
-          if (findTesteeIndex === -1) {
-            trainingList = makeTrainingList(trainingData.userInfo.language);
-          } else {
-            trainingList = prev[findTesteeIndex].trainingList;
-          }
-        }
-      }
-      const findIdx = trainingList.findIndex((f) => f.type === curr.task_type);
+    //       if (findTesteeIndex === -1) {
+    //         trainingList = makeTrainingList(trainingData.userInfo.language);
+    //       } else {
+    //         trainingList = prev[findTesteeIndex].trainingList;
+    //       }
+    //     }
+    //   }
+    //   const findIdx = trainingList.findIndex((f) => f.type === curr.task_type);
 
-      const trList = trainingData.resultList.filter((f) => f.trainingtask_idx === curr.trainingtask_idx);
-      const performedCount = trList.length; // 내가 한 수행횟수
-      const totDuration = trList.reduce((prev, curr) => prev + curr.tr_duration, 0) / 60;
-      const totScore = trList.reduce((prev, curr) => prev + (curr.tr_accuracyrate * 100 - 20) * 1.25, 0);
+    //   const trList = trainingData.resultList.filter((f) => f.trainingtask_idx === curr.trainingtask_idx);
+    //   const performedCount = trList.length; // 내가 한 수행횟수
+    //   const totDuration = trList.reduce((prev, curr) => prev + curr.tr_duration, 0) / 60;
+    //   const totScore = trList.reduce((prev, curr) => prev + (curr.tr_accuracyrate * 100 - 20) * 1.25, 0);
 
-      type WeekDaysType = "일" | "월" | "화" | "수" | "목" | "금" | "토";
-      const weeklyPerformedDays = curr.task_dayofweek.split(",") as WeekDaysType[];
-      const performDays = { 일: 0, 월: 1, 화: 2, 수: 3, 목: 4, 금: 5, 토: 6 };
-      const activeDays = Array(7).fill(false);
+    //   type WeekDaysType = "일" | "월" | "화" | "수" | "목" | "금" | "토";
+    //   const weeklyPerformedDays = curr.task_dayofweek.split(",") as WeekDaysType[];
+    //   const performDays = { 일: 0, 월: 1, 화: 2, 수: 3, 목: 4, 금: 5, 토: 6 };
+    //   const activeDays = Array(7).fill(false);
 
-      for (let i = 0; i < weeklyPerformedDays.length; i++) {
-        const d = performDays[weeklyPerformedDays[i]]; // 수행 날짜를 골라서
-        activeDays[d] = true; // 해당 날짜 인덱스에 설정하기
-      }
+    //   for (let i = 0; i < weeklyPerformedDays.length; i++) {
+    //     const d = performDays[weeklyPerformedDays[i]]; // 수행 날짜를 골라서
+    //     activeDays[d] = true; // 해당 날짜 인덱스에 설정하기
+    //   }
 
-      const sDate = dayjs(curr.task_startdate);
-      const eDate = dayjs(curr.task_enddate);
-      const startdate = dayjs(trainingData.userInfo.start_date);
-      const enddate = dayjs(trainingData.userInfo.end_date);
-      let needPerformedCount = 0;
-      let ptr = sDate;
+    //   const sDate = dayjs(curr.task_startdate);
+    //   const eDate = dayjs(curr.task_enddate);
+    //   const startdate = dayjs(trainingData.userInfo.start_date);
+    //   const enddate = dayjs(trainingData.userInfo.end_date);
+    //   let needPerformedCount = 0;
+    //   let ptr = sDate;
 
-      while (ptr <= eDate) {
-        // 날짜 계산 제대로 해야함
-        // 기간의 시작이 8.1이고 과제의 시작이 7.26이라면,
-        // 결국 계산은 8.1부터 계산을 해야함
-        // 기간의 끝이 8.15이고 과제의 끝이 8.17이라면,
-        // 결국 계산은 8.15까지 계산을 해야함
-        if (ptr > enddate) {
-          break;
-        }
+    //   while (ptr <= eDate) {
+    //     // 날짜 계산 제대로 해야함
+    //     // 기간의 시작이 8.1이고 과제의 시작이 7.26이라면,
+    //     // 결국 계산은 8.1부터 계산을 해야함
+    //     // 기간의 끝이 8.15이고 과제의 끝이 8.17이라면,
+    //     // 결국 계산은 8.15까지 계산을 해야함
+    //     if (ptr > enddate) {
+    //       break;
+    //     }
 
-        if (ptr < startdate) {
-          ptr = ptr.add(1, "day");
-          continue;
-        }
+    //     if (ptr < startdate) {
+    //       ptr = ptr.add(1, "day");
+    //       continue;
+    //     }
 
-        const day = ptr.day();
-        if (activeDays[day]) {
-          // 해야하는 날짜
-          needPerformedCount++;
-        }
-        ptr = ptr.add(1, "day");
-      }
+    //     const day = ptr.day();
+    //     if (activeDays[day]) {
+    //       // 해야하는 날짜
+    //       needPerformedCount++;
+    //     }
+    //     ptr = ptr.add(1, "day");
+    //   }
 
-      needPerformedCount *= curr.task_reculsivecount; // 총 해야했던 횟수
+    //   needPerformedCount *= curr.task_reculsivecount; // 총 해야했던 횟수
 
-      trainingList[findIdx].level += curr.task_level;
-      trainingList[findIdx].reculsiveCount += curr.task_reculsivecount;
-      trainingList[findIdx].weeklyPerformedDays += weeklyPerformedDays.length;
-      trainingList[findIdx].performedCount += performedCount;
-      trainingList[findIdx].needPerformedCount += needPerformedCount;
-      trainingList[findIdx].totDuration += totDuration;
-      trainingList[findIdx].totScore += totScore;
-      trainingList[findIdx].equalTypeCount++;
+    //   trainingList[findIdx].level += curr.task_level;
+    //   trainingList[findIdx].reculsiveCount += curr.task_reculsivecount;
+    //   trainingList[findIdx].weeklyPerformedDays += weeklyPerformedDays.length;
+    //   trainingList[findIdx].performedCount += performedCount;
+    //   trainingList[findIdx].needPerformedCount += needPerformedCount;
+    //   trainingList[findIdx].totDuration += totDuration;
+    //   trainingList[findIdx].totScore += totScore;
+    //   trainingList[findIdx].equalTypeCount++;
 
-      if (!prev) {
-        // 최초 삽입
-        return [
-          {
-            ...testeeInfo,
-            trainingList,
-          },
-        ];
-      } else if (findTesteeIndex !== -1) {
-        // 이미 있는 학생이라면 이미 추가했음
-        return prev;
-      } else {
-        // 추가 삽입
-        return [
-          ...prev,
-          {
-            ...testeeInfo,
-            trainingList,
-          },
-        ];
-      }
-    }, init);
+    //   if (!prev) {
+    //     // 최초 삽입
+    //     return [
+    //       {
+    //         ...testeeInfo,
+    //         trainingList,
+    //       },
+    //     ];
+    //   } else if (findTesteeIndex !== -1) {
+    //     // 이미 있는 학생이라면 이미 추가했음
+    //     return prev;
+    //   } else {
+    //     // 추가 삽입
+    //     return [
+    //       ...prev,
+    //       {
+    //         ...testeeInfo,
+    //         trainingList,
+    //       },
+    //     ];
+    //   }
+    // }, init);
 
-    // 뽑아냈으니 학생들 각각의 트레이닝 평균 계산하기
-    for (let i = 0; i < testeeList.length; i++) {
-      const currTestee = testeeList[i];
-      for (let j = 0; j < currTestee.trainingList.length; j++) {
-        const currTraining = currTestee.trainingList[j];
-        if (currTraining.equalTypeCount === 0) {
-          // 과제가 없는거
-          continue;
-        }
-        currTraining.level = +(currTraining.level / currTraining.equalTypeCount).toFixed(1); // 레벨
-        currTraining.reculsiveCount = +(currTraining.reculsiveCount / currTraining.equalTypeCount).toFixed(1); // 수행횟수
-        currTraining.weeklyPerformedDays = +(currTraining.weeklyPerformedDays / currTraining.equalTypeCount).toFixed(1); // 주간 수행일
-        currTraining.performedRatio = +(currTraining.performedCount / currTraining.needPerformedCount).toFixed(2); // 수행률
-        if (currTraining.performedCount === 0) {
-          // 수행을 한 번도 안함
-          currTraining.avgDuration = 0;
-          currTraining.avgScore = 0;
-        } else {
-          currTraining.avgDuration = +(currTraining.totDuration / currTraining.performedCount).toFixed(2);
-          currTraining.avgScore = +(currTraining.totScore / currTraining.performedCount).toFixed(2);
-        }
-      }
-    }
+    // // 뽑아냈으니 학생들 각각의 트레이닝 평균 계산하기
+    // for (let i = 0; i < testeeList.length; i++) {
+    //   const currTestee = testeeList[i];
+    //   for (let j = 0; j < currTestee.trainingList.length; j++) {
+    //     const currTraining = currTestee.trainingList[j];
+    //     if (currTraining.equalTypeCount === 0) {
+    //       // 과제가 없는거
+    //       continue;
+    //     }
+    //     currTraining.level = +(currTraining.level / currTraining.equalTypeCount).toFixed(1); // 레벨
+    //     currTraining.reculsiveCount = +(currTraining.reculsiveCount / currTraining.equalTypeCount).toFixed(1); // 수행횟수
+    //     currTraining.weeklyPerformedDays = +(currTraining.weeklyPerformedDays / currTraining.equalTypeCount).toFixed(1); // 주간 수행일
+    //     currTraining.performedRatio = +(currTraining.performedCount / currTraining.needPerformedCount).toFixed(2); // 수행률
+    //     if (currTraining.performedCount === 0) {
+    //       // 수행을 한 번도 안함
+    //       currTraining.avgDuration = 0;
+    //       currTraining.avgScore = 0;
+    //     } else {
+    //       currTraining.avgDuration = +(currTraining.totDuration / currTraining.performedCount).toFixed(2);
+    //       currTraining.avgScore = +(currTraining.totScore / currTraining.performedCount).toFixed(2);
+    //     }
+    //   }
+    // }
 
-    // 분기 점수 및 순위
-    const testeeScore = trainingData.rank.find((f) => f.testee_idx === trainingData.userInfo.testee_idx);
+    // // 분기 점수 및 순위
+    // const testeeScore = trainingData.rank.find((f) => f.testee_idx === trainingData.userInfo.testee_idx);
 
-    if (!testeeScore) {
-      resultData.totScore = 0;
-      resultData.firstScore = 0;
-      resultData.secondScore = 0;
-    } else {
-      resultData.totScore = testeeScore.tts_totalscore || 0;
-      resultData.firstScore = testeeScore.tts_firstscore || 0;
-      resultData.firstScoreRank = testeeScore.tts_firstscore_rank || 0;
-      resultData.firstScoreDate = dayjs(testeeScore.tts_firstscore_resetdate).format("YYYY-MM-DD");
-      resultData.secondScore = testeeScore.tts_secondscore || 0;
-      resultData.secondScoreDate = dayjs(testeeScore.tts_secondscore_resetdate).format("YYYY-MM-DD");
-    }
+    // if (!testeeScore) {
+    //   resultData.totScore = 0;
+    //   resultData.firstScore = 0;
+    //   resultData.secondScore = 0;
+    // } else {
+    //   resultData.totScore = testeeScore.tts_totalscore || 0;
+    //   resultData.firstScore = testeeScore.tts_firstscore || 0;
+    //   resultData.firstScoreRank = testeeScore.tts_firstscore_rank || 0;
+    //   resultData.firstScoreDate = dayjs(testeeScore.tts_firstscore_resetdate).format("YYYY-MM-DD");
+    //   resultData.secondScore = testeeScore.tts_secondscore || 0;
+    //   resultData.secondScoreDate = dayjs(testeeScore.tts_secondscore_resetdate).format("YYYY-MM-DD");
+    // }
 
-    // testeeList에서 내꺼 찾아서 넣어주기
-    const findMe = testeeList.find((f) => f.testeeIdx === resultData.testeeIdx);
-    if (!findMe) {
-      // 내꺼 없다면? 일단 return..
-      return;
-    }
+    // // testeeList에서 내꺼 찾아서 넣어주기
+    // const findMe = testeeList.find((f) => f.testeeIdx === resultData.testeeIdx);
+    // if (!findMe) {
+    //   // 내꺼 없다면? 일단 return..
+    //   return;
+    // }
 
-    // 과제 없는건 없애버리기
-    resultData.trainingList = findMe.trainingList.filter((f) => f.equalTypeCount !== 0);
+    // // 과제 없는건 없애버리기
+    // resultData.trainingList = findMe.trainingList.filter((f) => f.equalTypeCount !== 0);
 
-    // 내 전체 수행률, 평균 수행 점수, 일 평균 수행 시간, 기간 내의 점수
-    const trainingLength = resultData.trainingList.length;
+    // // 내 전체 수행률, 평균 수행 점수, 일 평균 수행 시간, 기간 내의 점수
+    // const trainingLength = resultData.trainingList.length;
 
-    const totPerformedCount = resultData.trainingList.reduce((prev, curr) => prev + curr.performedCount, 0); // 수행한 횟수 총합
-    const totNeedPerformedCount = resultData.trainingList.reduce((prev, curr) => prev + curr.needPerformedCount, 0); // 해야하는 횟수 총합
-    const totAvgScore = resultData.trainingList.reduce((prev, curr) => prev + curr.avgScore, 0);
-    const performedRatio = +(totPerformedCount / (totNeedPerformedCount || 1)).toFixed(2) * 100; // 전체 수행률
-    const avgScore = +(totAvgScore / (trainingLength || 1)).toFixed(2); // 평균 수행 점수
-    const avgDuration = +(resultData.trainingList.reduce((prev, curr) => prev + curr.totDuration, 0) / (trainingLength || 1)).toFixed(2); // 기간 내의 점수?
-    const dueScore = +resultData.trainingList.reduce((prev, curr) => prev + curr.totScore, 0).toFixed(0); // 기간 내의 점수?
+    // const totPerformedCount = resultData.trainingList.reduce((prev, curr) => prev + curr.performedCount, 0); // 수행한 횟수 총합
+    // const totNeedPerformedCount = resultData.trainingList.reduce((prev, curr) => prev + curr.needPerformedCount, 0); // 해야하는 횟수 총합
+    // const totAvgScore = resultData.trainingList.reduce((prev, curr) => prev + curr.avgScore, 0);
+    // const performedRatio = +(totPerformedCount / (totNeedPerformedCount || 1)).toFixed(2) * 100; // 전체 수행률
+    // const avgScore = +(totAvgScore / (trainingLength || 1)).toFixed(2); // 평균 수행 점수
+    // const avgDuration = +(resultData.trainingList.reduce((prev, curr) => prev + curr.totDuration, 0) / (trainingLength || 1)).toFixed(2); // 기간 내의 점수?
+    // const dueScore = +resultData.trainingList.reduce((prev, curr) => prev + curr.totScore, 0).toFixed(0); // 기간 내의 점수?
 
+    // // resultData.performedRatio = performedRatio;
     // resultData.performedRatio = performedRatio;
-    resultData.performedRatio = performedRatio;
-    resultData.avgScore = avgScore;
-    resultData.avgDuration = avgDuration; // 평균 수행시간
-    resultData.dueScore = dueScore; // 기간 내의 점수
+    // resultData.avgScore = avgScore;
+    // resultData.avgDuration = avgDuration; // 평균 수행시간
+    // resultData.dueScore = dueScore; // 기간 내의 점수
 
-    // chart title 내용
-    if (performedRatio >= 90) {
-      resultData.ratioTitle = "잘하고 있어요";
-    } else if (performedRatio >= 80) {
-      resultData.ratioTitle = "조금만 더 분발해요";
-    } else if (performedRatio >= 70) {
-      resultData.ratioTitle = "수행이 미흡해요";
-    } else {
-      resultData.ratioTitle = "수행이 많이 미흡해요";
-    }
+    // // chart title 내용
+    // if (performedRatio >= 90) {
+    //   resultData.ratioTitle = "잘하고 있어요";
+    // } else if (performedRatio >= 80) {
+    //   resultData.ratioTitle = "조금만 더 분발해요";
+    // } else if (performedRatio >= 70) {
+    //   resultData.ratioTitle = "수행이 미흡해요";
+    // } else {
+    //   resultData.ratioTitle = "수행이 많이 미흡해요";
+    // }
 
-    if (avgScore >= 80) {
-      resultData.scoreTitle = "쉬워요";
-    } else if (avgScore >= 60) {
-      resultData.scoreTitle = "적당해요";
-    } else {
-      resultData.scoreTitle = "어려워요";
-    }
+    // if (avgScore >= 80) {
+    //   resultData.scoreTitle = "쉬워요";
+    // } else if (avgScore >= 60) {
+    //   resultData.scoreTitle = "적당해요";
+    // } else {
+    //   resultData.scoreTitle = "어려워요";
+    // }
 
-    if (avgDuration >= 40) {
-      resultData.durationTitle = "수행량이 너무 많아요";
-    } else if (avgDuration >= 25) {
-      resultData.durationTitle = "수행량이 조금 많아요";
-    } else if (avgDuration >= 15) {
-      resultData.durationTitle = "수행량이 적절해요";
-    } else {
-      resultData.durationTitle = "수행량이 적어요";
-    }
+    // if (avgDuration >= 40) {
+    //   resultData.durationTitle = "수행량이 너무 많아요";
+    // } else if (avgDuration >= 25) {
+    //   resultData.durationTitle = "수행량이 조금 많아요";
+    // } else if (avgDuration >= 15) {
+    //   resultData.durationTitle = "수행량이 적절해요";
+    // } else {
+    //   resultData.durationTitle = "수행량이 적어요";
+    // }
 
-    // 그룹
-    let totGroupPerformedRatio = 0;
-    let totGroupAvgScore = 0;
-    let totGroupAvgDuration = 0;
-    const groupTypeObject = {
-      SentenceMask: { score: 0, cnt: 0 },
-      CategoryFinding: { score: 0, cnt: 0 },
-      KeywordFinding: { score: 0, cnt: 0 },
-      WordOrdering: { score: 0, cnt: 0 },
-      VisualSpan: { score: 0, cnt: 0 },
-      VisualCounting: { score: 0, cnt: 0 },
-      TMT: { score: 0, cnt: 0 },
-      Stroop: { score: 0, cnt: 0 },
-      SaccadeTracking: { score: 0, cnt: 0 },
-      PursuitTracking: { score: 0, cnt: 0 },
-      AntiTracking: { score: 0, cnt: 0 },
-      SentenceTracking: { score: 0, cnt: 0 },
-      ExerciseHorizontal: { score: 0, cnt: 0 },
-      ExerciseVertical: { score: 0, cnt: 0 },
-      ExerciseHJump: { score: 0, cnt: 0 },
-      ExerciseVJump: { score: 0, cnt: 0 },
-    };
-    for (let i = 0; i < testeeList.length; i++) {
-      const currActiveTraining = testeeList[i].trainingList.filter((f) => f.equalTypeCount !== 0);
+    // // 그룹
+    // let totGroupPerformedRatio = 0;
+    // let totGroupAvgScore = 0;
+    // let totGroupAvgDuration = 0;
+    // const groupTypeObject = {
+    //   SentenceMask: { score: 0, cnt: 0 },
+    //   CategoryFinding: { score: 0, cnt: 0 },
+    //   KeywordFinding: { score: 0, cnt: 0 },
+    //   WordOrdering: { score: 0, cnt: 0 },
+    //   VisualSpan: { score: 0, cnt: 0 },
+    //   VisualCounting: { score: 0, cnt: 0 },
+    //   TMT: { score: 0, cnt: 0 },
+    //   Stroop: { score: 0, cnt: 0 },
+    //   SaccadeTracking: { score: 0, cnt: 0 },
+    //   PursuitTracking: { score: 0, cnt: 0 },
+    //   AntiTracking: { score: 0, cnt: 0 },
+    //   SentenceTracking: { score: 0, cnt: 0 },
+    //   ExerciseHorizontal: { score: 0, cnt: 0 },
+    //   ExerciseVertical: { score: 0, cnt: 0 },
+    //   ExerciseHJump: { score: 0, cnt: 0 },
+    //   ExerciseVJump: { score: 0, cnt: 0 },
+    // };
+    // for (let i = 0; i < testeeList.length; i++) {
+    //   const currActiveTraining = testeeList[i].trainingList.filter((f) => f.equalTypeCount !== 0);
 
-      const testeePerformedCount = currActiveTraining.reduce((prev, curr) => prev + curr.performedCount, 0); // 수행한 횟수 총합
-      const testeeNeedPerformedCount = currActiveTraining.reduce((prev, curr) => prev + curr.needPerformedCount, 0); // 해야하는 횟수 총합
-      const testeeAvgScore = currActiveTraining.reduce((prev, curr) => prev + curr.avgScore, 0);
-      const testeeAvgDuration = currActiveTraining.reduce((prev, curr) => prev + curr.totDuration, 0);
+    //   const testeePerformedCount = currActiveTraining.reduce((prev, curr) => prev + curr.performedCount, 0); // 수행한 횟수 총합
+    //   const testeeNeedPerformedCount = currActiveTraining.reduce((prev, curr) => prev + curr.needPerformedCount, 0); // 해야하는 횟수 총합
+    //   const testeeAvgScore = currActiveTraining.reduce((prev, curr) => prev + curr.avgScore, 0);
+    //   const testeeAvgDuration = currActiveTraining.reduce((prev, curr) => prev + curr.totDuration, 0);
 
-      totGroupPerformedRatio += +(testeePerformedCount / (testeeNeedPerformedCount || 1)).toFixed(2);
-      totGroupAvgScore += +(testeeAvgScore / (currActiveTraining.length || 1)).toFixed(2); // 평균 수행 점수
-      totGroupAvgDuration += +(testeeAvgDuration / (currActiveTraining.length || 1)).toFixed(2);
+    //   totGroupPerformedRatio += +(testeePerformedCount / (testeeNeedPerformedCount || 1)).toFixed(2);
+    //   totGroupAvgScore += +(testeeAvgScore / (currActiveTraining.length || 1)).toFixed(2); // 평균 수행 점수
+    //   totGroupAvgDuration += +(testeeAvgDuration / (currActiveTraining.length || 1)).toFixed(2);
 
-      currActiveTraining.forEach((t) => {
-        groupTypeObject[t.type].score += t.avgScore;
-        groupTypeObject[t.type].cnt++;
-      });
-    }
+    //   currActiveTraining.forEach((t) => {
+    //     groupTypeObject[t.type].score += t.avgScore;
+    //     groupTypeObject[t.type].cnt++;
+    //   });
+    // }
 
-    const typeList = Object.keys(groupTypeObject);
-    const groupTrainingTypeAvgScore: Record<typenames, number> = {
-      SentenceMask: 0,
-      CategoryFinding: 0,
-      KeywordFinding: 0,
-      WordOrdering: 0,
-      VisualSpan: 0,
-      VisualCounting: 0,
-      TMT: 0,
-      Stroop: 0,
-      SaccadeTracking: 0,
-      PursuitTracking: 0,
-      AntiTracking: 0,
-      SentenceTracking: 0,
-      ExerciseHorizontal: 0,
-      ExerciseVertical: 0,
-      ExerciseHJump: 0,
-      ExerciseVJump: 0,
-    };
+    // const typeList = Object.keys(groupTypeObject);
+    // const groupTrainingTypeAvgScore: Record<typenames, number> = {
+    //   SentenceMask: 0,
+    //   CategoryFinding: 0,
+    //   KeywordFinding: 0,
+    //   WordOrdering: 0,
+    //   VisualSpan: 0,
+    //   VisualCounting: 0,
+    //   TMT: 0,
+    //   Stroop: 0,
+    //   SaccadeTracking: 0,
+    //   PursuitTracking: 0,
+    //   AntiTracking: 0,
+    //   SentenceTracking: 0,
+    //   ExerciseHorizontal: 0,
+    //   ExerciseVertical: 0,
+    //   ExerciseHJump: 0,
+    //   ExerciseVJump: 0,
+    // };
 
-    for (let i = 0; i < typeList.length; i++) {
-      // @ts-ignore;
-      const key: typenames = typeList[i];
-      if (groupTypeObject[key].cnt === 0) {
-        groupTrainingTypeAvgScore[key] = 0;
-      } else {
-        groupTrainingTypeAvgScore[key] = groupTypeObject[key].score / (groupTypeObject[key].cnt || 1);
-      }
-    }
+    // for (let i = 0; i < typeList.length; i++) {
+    //   // @ts-ignore;
+    //   const key: typenames = typeList[i];
+    //   if (groupTypeObject[key].cnt === 0) {
+    //     groupTrainingTypeAvgScore[key] = 0;
+    //   } else {
+    //     groupTrainingTypeAvgScore[key] = groupTypeObject[key].score / (groupTypeObject[key].cnt || 1);
+    //   }
+    // }
 
-    totGroupPerformedRatio = +(totGroupPerformedRatio / (testeeList.length || 1)).toFixed(2) * 100;
-    totGroupAvgScore = +(totGroupAvgScore / (testeeList.length || 1)).toFixed(2);
-    totGroupAvgDuration = +(totGroupAvgDuration / (testeeList.length || 1)).toFixed(2);
+    // totGroupPerformedRatio = +(totGroupPerformedRatio / (testeeList.length || 1)).toFixed(2) * 100;
+    // totGroupAvgScore = +(totGroupAvgScore / (testeeList.length || 1)).toFixed(2);
+    // totGroupAvgDuration = +(totGroupAvgDuration / (testeeList.length || 1)).toFixed(2);
 
-    const groupScoreList = {
-      performedRatio: totGroupPerformedRatio,
-      avgScore: totGroupAvgScore,
-      avgDuration: totGroupAvgDuration, // 평균 수행시간
+    // const groupScoreList = {
+    //   performedRatio: totGroupPerformedRatio,
+    //   avgScore: totGroupAvgScore,
+    //   avgDuration: totGroupAvgDuration, // 평균 수행시간
 
-      ...groupTrainingTypeAvgScore,
-    };
+    //   ...groupTrainingTypeAvgScore,
+    // };
 
-    resultData.groupScoreList = groupScoreList;
+    // resultData.groupScoreList = groupScoreList;
 
     setData(resultData);
   }, [trainingData, meIndex, info]);

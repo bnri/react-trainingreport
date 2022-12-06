@@ -41,6 +41,7 @@ const App: React.FC = () => {
         info={{
           start_date: "2022-11-01",
           end_date: "2022-11-30",
+          agency_logo: "",
         }}
       />
     </div>
