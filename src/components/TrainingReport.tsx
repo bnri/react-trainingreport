@@ -29,6 +29,20 @@ const makeTrainingObject = (type: typenames, language: "한국어" | "영어"): 
   equalTypeCount: 0, // 이 type이 지금 몇 개 나왔는지
 });
 
+export const getActiveDays = (dayofweek: string): boolean[] => {
+  type dayofweekType = "일" | "월" | "화" | "수" | "목" | "금" | "토";
+  const weeklyPerformedDays = dayofweek.split(",") as dayofweekType[];
+  const daysObj = { 일: 0, 월: 1, 화: 2, 수: 3, 목: 4, 금: 5, 토: 6 };
+  const activeDays = Array(7).fill(false);
+
+  for (let k = 0; k < weeklyPerformedDays.length; k++) {
+    const d = daysObj[weeklyPerformedDays[k]]; // 수행 날짜를 골라서
+    activeDays[d] = true; // 해당 날짜 인덱스에 설정하기
+  }
+
+  return activeDays;
+};
+
 const makeTrainingList = (language: "한국어" | "영어") => {
   const typenameList: typenames[] = [
     "SentenceMask",
@@ -160,10 +174,101 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       avgScore: 0,
       avgDuration: 0,
     };
-    let performedCount = 0;
-    let totScore = 0;
-    let totDuration = 0;
-    let count = 0;
+
+    let myPerformedCount = 0; // 수행률 계산, 내가 수행한 횟수
+    let myNeedPerformedCount = 0; // 수행률 계산, 수행했어야하는 횟수
+
+    let myTotScore = 0; // 수행 총 점수
+    let myTotDuration = 0; // 수행 총 시간
+
+    // 일단 내 점수부터
+    const endDate = dayjs(info.end_date);
+
+    const myTaskList = trainingData[meIndex].taskList;
+    for (let i = 0; i < myTaskList.length; i++) {
+      if (myTaskList[i].isactive === 0) {
+        // 비활성 과제는 pass
+        continue;
+      }
+
+      const task = myTaskList[i];
+      // start_date~end_date까지 각 요일별로 체크해서
+      // 해당일이 수행해야하는 날이었는지 아닌지 체크
+      const activeDays = getActiveDays(task.dayofweek);
+
+      let ptr = dayjs(info.start_date);
+      while (ptr <= endDate) {
+        const day = ptr.day();
+
+        if (!activeDays[day]) {
+          ptr = ptr.add(1, "day");
+          continue;
+        }
+
+        // 해야했던 날
+        const format = ptr.format("YYYY-MM-DD");
+        // 트레이닝 결과가 있는지 확인
+        if (task.trainingResult.hasOwnProperty(format)) {
+          myPerformedCount += task.trainingResult[format].length;
+          myTotScore += task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_score, 0);
+          myTotDuration += task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_duration, 0);
+        }
+        myNeedPerformedCount += task.reculsivecount;
+
+        ptr = ptr.add(1, "day");
+      }
+    }
+
+    resultData.dueScore = myTotScore;
+    resultData.performedRatio = parseFloat(((myPerformedCount / myNeedPerformedCount) * 100).toFixed(2));
+    resultData.avgScore = parseFloat((myTotScore / myPerformedCount).toFixed(2));
+    resultData.avgDuration = parseFloat((myTotDuration / myPerformedCount).toFixed(2));
+
+    // 그룹 점수 내기, 내꺼는 구해놨으니 초기화를 내꺼로
+    let groupPerformedCount = myPerformedCount; // 수행률 계산, 그룹의 수행한 횟수
+    let groupNeedPerformedCount = myNeedPerformedCount; // 수행률 계산, 수행했어야하는 횟수
+
+    let groupTotScore = myTotScore; // 수행 총 점수,
+    let groupTotDuration = myTotDuration; // 수행 총 시간
+
+    for (let i = 0; i < trainingData.length; i++) {
+      if (i === meIndex) {
+        continue;
+      }
+
+      const taskList = trainingData[i].taskList;
+      for (let j = 0; j < taskList.length; j++) {
+        if (taskList[j].isactive === 0) {
+          continue;
+        }
+        const task = taskList[i];
+        // start_date~end_date까지 각 요일별로 체크해서
+        // 해당일이 수행해야하는 날이었는지 아닌지 체크
+        const activeDays = getActiveDays(task.dayofweek);
+
+        let ptr = dayjs(info.start_date);
+        while (ptr <= endDate) {
+          const day = ptr.day();
+
+          if (!activeDays[day]) {
+            ptr = ptr.add(1, "day");
+            continue;
+          }
+
+          // 해야했던 날
+          const format = ptr.format("YYYY-MM-DD");
+          // 트레이닝 결과가 있는지 확인
+          if (task.trainingResult.hasOwnProperty(format)) {
+            groupPerformedCount += task.trainingResult[format].length;
+            groupTotScore += task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_score, 0);
+            groupTotDuration += task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_duration, 0);
+          }
+          groupNeedPerformedCount += task.reculsivecount;
+
+          ptr = ptr.add(1, "day");
+        }
+      }
+    }
 
     // reculsiveCount: number; // 일 수행횟수(recul)
     // weeklyPerformedDays: number; // 주당 수행일(dayofweek 개수)
