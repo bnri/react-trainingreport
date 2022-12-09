@@ -183,7 +183,7 @@ export interface TrainingResultType {
 export interface TaskType {
   dayofweek: string;
   isactive: number;
-  language: "한국어" | "영어" | "중국어";
+  language: "한국어" | "영어";
   level: number;
   reculsivecount: number;
   task_name: taskNames;
@@ -219,5 +219,6 @@ export interface ReportProps {
     start_date: string;
     end_date: string;
     agency_logo?: string;
+    language: "한국어" | "영어";
   };
 }

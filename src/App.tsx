@@ -39,9 +39,10 @@ const App: React.FC = () => {
         data={NewDummy}
         meIndex={0}
         info={{
-          start_date: "2022-11-01",
-          end_date: "2022-11-30",
+          start_date: "2022-12-07",
+          end_date: "2022-12-09",
           agency_logo: "",
+          language: "한국어",
         }}
       />
     </div>
