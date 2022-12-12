@@ -280,7 +280,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     }
 
     resultData.dueScore = myTotScore;
-    resultData.performedRatio = parseFloat((((myPerformedCount || 1) / (myNeedPerformedCount || 1)) * 100).toFixed(2));
+    resultData.performedRatio = parseFloat(((myPerformedCount / (myNeedPerformedCount || 1)) * 100).toFixed(2));
     resultData.avgScore = parseFloat((myTotScore / (myPerformedCount || 1)).toFixed(2));
     resultData.avgDuration = parseFloat((myTotDuration / (myPerformedCount || 1)).toFixed(2));
 
@@ -370,7 +370,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     }
 
     resultData.groupScoreList = {
-      performedRatio: parseFloat((((groupPerformedCount || 1) / (groupNeedPerformedCount || 1)) * 100).toFixed(2)),
+      performedRatio: parseFloat(((groupPerformedCount / (groupNeedPerformedCount || 1)) * 100).toFixed(2)),
       avgScore: parseFloat((groupTotScore / (groupPerformedCount || 1)).toFixed(2)),
       avgDuration: parseFloat((groupTotDuration / (groupPerformedCount || 1)).toFixed(2)),
 
