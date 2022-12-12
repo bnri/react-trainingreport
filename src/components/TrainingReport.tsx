@@ -177,6 +177,26 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       trainingList: makeTrainingList(info.language),
     };
 
+    // 그룹의 총 점수 계산
+    const groupScoreObject = {
+      SentenceMask: { score: 0, cnt: 0 },
+      CategoryFinding: { score: 0, cnt: 0 },
+      KeywordFinding: { score: 0, cnt: 0 },
+      WordOrdering: { score: 0, cnt: 0 },
+      VisualSpan: { score: 0, cnt: 0 },
+      VisualCounting: { score: 0, cnt: 0 },
+      TMT: { score: 0, cnt: 0 },
+      Stroop: { score: 0, cnt: 0 },
+      SaccadeTracking: { score: 0, cnt: 0 },
+      PursuitTracking: { score: 0, cnt: 0 },
+      AntiTracking: { score: 0, cnt: 0 },
+      SentenceTracking: { score: 0, cnt: 0 },
+      ExerciseHorizontal: { score: 0, cnt: 0 },
+      ExerciseVertical: { score: 0, cnt: 0 },
+      ExerciseHJump: { score: 0, cnt: 0 },
+      ExerciseVJump: { score: 0, cnt: 0 },
+    };
+
     let myPerformedCount = 0; // 수행률 계산, 내가 수행한 횟수
     let myNeedPerformedCount = 0; // 수행률 계산, 수행했어야하는 횟수
 
@@ -217,11 +237,15 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         const format = ptr.format("YYYY-MM-DD");
         // 트레이닝 결과가 있는지 확인
         if (task.trainingResult.hasOwnProperty(format)) {
+          const taskScore = task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_score, 0);
           performedCount += task.trainingResult[format].length;
-          totScore += task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_score, 0);
+          totScore += taskScore;
           totDuration += task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_duration, 0);
+
+          groupScoreObject[task.task_name].score += taskScore;
         }
         needPerformedCount += task.reculsivecount;
+        groupScoreObject[task.task_name].cnt++;
 
         ptr = ptr.add(1, "day");
       }
@@ -281,6 +305,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           continue;
         }
         const task = taskList[i];
+
         // start_date~end_date까지 각 요일별로 체크해서
         // 해당일이 수행해야하는 날이었는지 아닌지 체크
         const activeDays = getActiveDays(task.dayofweek);
@@ -296,18 +321,61 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
 
           // 해야했던 날
           const format = ptr.format("YYYY-MM-DD");
-          // 트레이닝 결과가 있는지 확인
+          // 그 날짜에 트레이닝 결과가 있는지 확인
           if (task.trainingResult.hasOwnProperty(format)) {
+            const taskScore = task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_score, 0);
             groupPerformedCount += task.trainingResult[format].length;
-            groupTotScore += task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_score, 0);
+            groupTotScore += taskScore;
             groupTotDuration += task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_duration, 0);
+
+            groupScoreObject[task.task_name].score += taskScore;
           }
           groupNeedPerformedCount += task.reculsivecount;
+
+          groupScoreObject[task.task_name].cnt++;
 
           ptr = ptr.add(1, "day");
         }
       }
     }
+
+    const groupTrainingTypeAvgScore: Record<typenames, number> = {
+      SentenceMask: 0,
+      CategoryFinding: 0,
+      KeywordFinding: 0,
+      WordOrdering: 0,
+      VisualSpan: 0,
+      VisualCounting: 0,
+      TMT: 0,
+      Stroop: 0,
+      SaccadeTracking: 0,
+      PursuitTracking: 0,
+      AntiTracking: 0,
+      SentenceTracking: 0,
+      ExerciseHorizontal: 0,
+      ExerciseVertical: 0,
+      ExerciseHJump: 0,
+      ExerciseVJump: 0,
+    };
+
+    const typeList = Object.keys(groupScoreObject);
+    for (let i = 0; i < typeList.length; i++) {
+      // @ts-ignore;
+      const key: typenames = typeList[i];
+      if (groupScoreObject[key].cnt === 0) {
+        groupTrainingTypeAvgScore[key] = 0;
+      } else {
+        groupTrainingTypeAvgScore[key] = groupScoreObject[key].score / (groupScoreObject[key].cnt || 1);
+      }
+    }
+
+    resultData.groupScoreList = {
+      performedRatio: parseFloat((((groupPerformedCount || 1) / (groupNeedPerformedCount || 1)) * 100).toFixed(2)),
+      avgScore: parseFloat((groupTotScore / (groupPerformedCount || 1)).toFixed(2)),
+      avgDuration: parseFloat((groupTotDuration / (groupPerformedCount || 1)).toFixed(2)),
+
+      ...groupTrainingTypeAvgScore,
+    };
 
     // reculsiveCount: number; // 일 수행횟수(recul)
     // weeklyPerformedDays: number; // 주당 수행일(dayofweek 개수)
