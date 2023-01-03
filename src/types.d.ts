@@ -170,12 +170,14 @@ export interface TrainingReportProps {
 }
 
 export interface TrainingResultType {
+  [x: string]: number;
   testee_task_idx: number;
   tr_accuracyrate: number;
   tr_duration: number;
   tr_feeling?: string;
   tr_score: number;
   tr_starttime: string;
+  tr_level: number;
   trainingresult_idx: number;
   trainingtext_idx?: number;
 }
