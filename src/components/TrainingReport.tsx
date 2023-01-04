@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import PDF, { preloadDone } from "../lib/pdf";
-import { ReportProps, ReportType, testeeList, TrainingType, typenames } from "../types";
+import { ReportProps, ReportType, TrainingType, typenames } from "../types";
 import { imgbase64forPDF } from "../lib/base64";
 
 dayjs.extend(utc);
@@ -202,7 +202,6 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
 
     let myTotScore = 0; // 수행 총 점수
     let myTotAvgScore = 0; // 수행 평균점수들의 합
-    let myTotDuration = 0; // 수행 총 시간
     let myTotAvgDuration = 0; // 수행 평균시간들의 합
 
     // 일단 내 점수부터
@@ -251,10 +250,6 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           taskTotScore += taskScore;
           totLevel += taskLevel;
           taskTotDuration += taskDuration;
-
-          // groupScoreObject[task.task_name].score += taskScore;
-          // groupScoreObject[task.task_name].duration += taskDuration;
-          // groupScoreObject[task.task_name].cnt += task.trainingResult[format].length;
         }
         needPerformedCount += task.reculsivecount;
 
@@ -286,9 +281,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         resultData.trainingList[findIndex].level = parseFloat((totLevel / performedCount).toFixed(1));
         resultData.trainingList[findIndex].avgScore = parseFloat((taskTotScore / performedCount).toFixed(1));
         resultData.trainingList[findIndex].avgDuration = parseFloat((taskTotDuration / performedCount).toFixed(1));
-        groupScoreObject[task.task_name].avgTotScore += resultData.trainingList[findIndex].avgScore;
-        groupScoreObject[task.task_name].avgTotDuration += resultData.trainingList[findIndex].avgDuration;
-        groupScoreObject[task.task_name].cnt++;
+
         myChartCount++;
       }
 
@@ -296,7 +289,6 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       myNeedPerformedCount += needPerformedCount; // 내가 해야했던 총 수행횟수
 
       myTotScore += taskTotScore;
-      myTotDuration += taskTotDuration;
       myTotAvgScore += resultData.trainingList[findIndex].avgScore;
       myTotAvgDuration += resultData.trainingList[findIndex].avgDuration;
     }
@@ -310,17 +302,13 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     resultData.trainingList = resultData.trainingList.filter((f) => f.equalTypeCount !== 0);
 
     // 그룹 점수 내기, 내꺼는 구해놨으니 초기화를 내꺼로
-    let groupPerformedCount = myPerformedCount; // 수행률 계산, 그룹의 수행한 횟수
-    let groupNeedPerformedCount = myNeedPerformedCount; // 수행률 계산, 수행했어야하는 횟수
+    let groupPerformedCount = 0; // 수행률 계산, 그룹의 수행한 횟수
+    let groupNeedPerformedCount = 0; // 수행률 계산, 수행했어야하는 횟수
 
-    let groupTotAvgScore = resultData.avgScore; // 수행 총 평균점수들의 합
-    let groupTotAvgDuration = resultData.avgDuration; // 수행 총 평균시간들의 합
+    let groupTotAvgScore = 0; // 수행 총 평균점수들의 합
+    let groupTotAvgDuration = 0; // 수행 총 평균시간들의 합
 
     for (let i = 0; i < trainingData.length; i++) {
-      if (i === meIndex) {
-        continue;
-      }
-
       const taskList = trainingData[i].taskList;
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].isactive === 0 || taskList[j].language !== info.language) {
@@ -373,6 +361,9 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           groupScoreObject[task.task_name].avgTotDuration += parseFloat((taskTotDuration / performedCount).toFixed(1));
           groupScoreObject[task.task_name].cnt++;
         }
+
+        groupPerformedCount += performedCount; // 내 총 수행횟수
+        groupNeedPerformedCount += needPerformedCount; // 내가 해야했던 총 수행횟수
       }
     }
 
@@ -396,7 +387,6 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     };
 
     const typeList = Object.keys(groupScoreObject);
-    console.log("🚀 ~ file: TrainingReport.tsx:374 ~ useEffect ~ groupScoreObject", groupScoreObject);
 
     for (let i = 0; i < typeList.length; i++) {
       // @ts-ignore;
@@ -1001,7 +991,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           </StyledChart>
         </StyledChartBox>
       </StyledChartWrapper>
-      <span style={{ fontSize: "1.2em" }}>* 기관 평균 : 학생이 속한 기관(abc컴퓨터학원)의 전체 학생들의 평균점수</span>
+      <StyledChartSpan>* 기관 평균 : 학생이 속한 기관({data.agencyName})의 전체 학생들의 평균 점수</StyledChartSpan>
       <StyledGridWrapper id="reportTable">
         <StyledGridTitle>개별 Training 수행 결과</StyledGridTitle>
         <StyledGrid>
@@ -1317,6 +1307,10 @@ const StyledChart = styled.div`
   height: calc(100% - 30px - 1.5em);
   margin: 0.5em;
   margin-bottom: 1em;
+`;
+
+const StyledChartSpan = styled.span`
+  font-size: 1.2em;
 `;
 
 const StyledGridWrapper = styled(StyledWrapper)``;

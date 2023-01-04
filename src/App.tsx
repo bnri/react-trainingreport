@@ -37,7 +37,7 @@ const App: React.FC = () => {
       <TrainingReport
         ref={ref}
         data={NewDummy}
-        meIndex={1}
+        meIndex={3}
         info={{
           start_date: "2022-12-01",
           end_date: "2023-01-03",

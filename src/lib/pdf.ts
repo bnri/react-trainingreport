@@ -449,18 +449,7 @@ export default class PDF {
       const ratioSrc = ratioChart.toDataURL();
       const avgScoreSrc = avgScoreChart.toDataURL();
       const avgDurationSrc = avgDurationChart.toDataURL();
-      const headerList = [
-        "할당된 과제",
-        "레벨",
-        "언어",
-        "일 수행횟수",
-        "주당 수행일",
-        "총 수행횟수",
-        "수행률",
-        "총 수행시간",
-        "평균 점수",
-        "총 획득점수",
-      ];
+      const headerList = ["할당된 과제", "레벨", "언어", "일 수행횟수", "주당 수행일", "총 수행횟수", "수행률", "총 수행시간", "평균 점수", "총 획득점수"];
       const typenameList = [
         "Sentence Mask",
         "Word Ordering",
@@ -480,9 +469,7 @@ export default class PDF {
         "Exercise VJump",
       ];
 
-      const firstScoreText = `${this.data.firstScore.toLocaleString()}점(${this.data.firstScoreDate} 이후, ${
-        this.tier
-      }, ${this.data.firstScoreRank}위)`;
+      const firstScoreText = `${this.data.firstScore.toLocaleString()}점(${this.data.firstScoreDate} 이후, ${this.tier}, ${this.data.firstScoreRank}위)`;
 
       this.doc.content = [
         ...(this.doc.content as Content[]),
@@ -605,6 +592,10 @@ export default class PDF {
             hLineColor: () => "#aaa9bc",
             vLineColor: () => "#aaa9bc",
           },
+        },
+        {
+          text: `* 기관 평균 : 학생이 속한 기관(${this.data.agencyName})의 전체 학생들의 평균 점수`,
+          fontSize: 10,
         },
         { text: `개별 Training 수행 결과`, style: "sectionTitle" },
         {
