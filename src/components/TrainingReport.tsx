@@ -307,7 +307,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     }
 
     const myPerformedDateList = Object.keys(myResultObj);
-    myTotAvgDuration = myPerformedDateList.reduce((prev, curr) => prev + myResultObj[curr].duration, 0);
+    myTotAvgDuration = myPerformedDateList.reduce((prev, curr) => prev + myResultObj[curr].duration, 0) / (myPerformedDateList.length || 1);
     const avgDuration = myTotAvgDuration / 60; // 분(minute)으로 바꾸기
 
     resultData.dueScore = myTotScore;
