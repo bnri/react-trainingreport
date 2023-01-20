@@ -214,7 +214,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     let myChartCount = 0; // 차트에 필요한 평균을 낼 개수
     let groupChartCount = 0;
 
-    const weekResultObj: { [key: string]: { duration: number } } = {};
+    const myResultObj: { [key: string]: { duration: number } } = {};
 
     for (let i = 0; i < myTaskList.length; i++) {
       if (myTaskList[i].isactive === 0 || myTaskList[i].language !== info.language) {
@@ -235,7 +235,6 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       let totLevel = 0; // 각 결과에 대한 레벨 합계
       let performedDayCount = 0; // 수행한 날짜의 개수
 
-      console.log("task", task.task_name);
       while (ptr <= endDate) {
         const day = ptr.day();
 
@@ -247,18 +246,15 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         // 해야했던 날
         const format = ptr.format("YYYY-MM-DD");
         // 트레이닝 결과가 있는지 확인
-        console.log("🚀", format);
-        console.log("task.trainingResult", task.trainingResult);
         if (task.trainingResult[format]) {
-          console.log("aaaaaa");
           const taskScore = task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_score, 0);
           const taskLevel = task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_level, 0);
           const taskDuration = task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_duration, 0);
 
-          if (weekResultObj.hasOwnProperty(format)) {
-            weekResultObj[format].duration += taskDuration;
+          if (myResultObj.hasOwnProperty(format)) {
+            myResultObj[format].duration += taskDuration;
           } else {
-            weekResultObj[format] = { duration: taskDuration };
+            myResultObj[format] = { duration: taskDuration };
           }
 
           performedCount += task.trainingResult[format].length;
@@ -310,8 +306,8 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       // myTotAvgDuration += resultData.trainingList[findIndex].avgDuration;
     }
 
-    const weekPerformedDateList = Object.keys(weekResultObj);
-    myTotAvgDuration = weekPerformedDateList.reduce((prev, curr) => prev + weekResultObj[curr].duration, 0);
+    const myPerformedDateList = Object.keys(myResultObj);
+    myTotAvgDuration = myPerformedDateList.reduce((prev, curr) => prev + myResultObj[curr].duration, 0);
     const avgDuration = myTotAvgDuration / 60; // 분(minute)으로 바꾸기
 
     resultData.dueScore = myTotScore;
@@ -328,9 +324,11 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
 
     let groupTotAvgScore = 0; // 수행 총 평균점수들의 합
     let groupTotAvgDuration = 0; // 수행 총 평균시간들의 합
+    let groupTotPerformedCount = 0;
 
     for (let i = 0; i < trainingData.length; i++) {
       const taskList = trainingData[i].taskList;
+      const groupResultObj: { [key: string]: { duration: number; cnt: number } } = {};
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].isactive === 0 || taskList[j].language !== info.language) {
           continue;
@@ -361,6 +359,15 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           if (task.trainingResult.hasOwnProperty(format)) {
             const taskScore = task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_score, 0);
             const taskDuration = task.trainingResult[format].reduce((prev, curr) => prev + curr.tr_duration, 0);
+            const cnt = task.trainingResult[format].length;
+
+            if (groupResultObj.hasOwnProperty(format)) {
+              groupResultObj[format].duration += taskDuration;
+              groupResultObj[format].cnt += cnt;
+            } else {
+              groupResultObj[format] = { duration: taskDuration, cnt };
+            }
+
             performedCount += task.trainingResult[format].length;
             taskTotScore += taskScore;
             taskTotDuration += taskDuration;
@@ -386,6 +393,16 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         groupPerformedCount += performedCount; // 내 총 수행횟수
         groupNeedPerformedCount += needPerformedCount; // 내가 해야했던 총 수행횟수
       }
+
+      if (Object.keys(groupResultObj).length === 0) {
+        continue;
+      }
+
+      const performedDateList = Object.keys(groupResultObj);
+      const groupAvgDuration = performedDateList.reduce((prev, curr) => prev + groupResultObj[curr].duration, 0) / performedDateList.length;
+      const minuteDuration = groupAvgDuration / 60; // 분(minute)으로 바꾸기
+      groupTotAvgDuration += minuteDuration;
+      groupTotPerformedCount++;
     }
 
     const groupTrainingTypeAvgScore: Record<typenames, number> = {
@@ -417,15 +434,17 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       } else {
         groupTrainingTypeAvgScore[key] = parseFloat((groupScoreObject[key].avgTotScore / groupScoreObject[key].cnt).toFixed(1));
         groupTotAvgScore += groupTrainingTypeAvgScore[key];
-        groupTotAvgDuration += parseFloat((groupScoreObject[key].avgTotDuration / groupScoreObject[key].cnt).toFixed(1));
+        // groupTotAvgDuration += parseFloat((groupScoreObject[key].avgTotDuration / groupScoreObject[key].cnt).toFixed(1));
         groupChartCount++;
       }
     }
 
+    const groupAvgDuration = groupTotPerformedCount !== 0 ? groupTotAvgDuration / groupTotPerformedCount : 0;
+
     resultData.groupScoreList = {
       performedRatio: parseFloat(((groupPerformedCount / (groupNeedPerformedCount || 1)) * 100).toFixed(1)),
       avgScore: parseFloat((groupTotAvgScore / (groupChartCount || 1)).toFixed(1)),
-      avgDuration: parseFloat((groupTotAvgDuration / (groupChartCount || 1)).toFixed(1)),
+      avgDuration: parseFloat(groupAvgDuration.toFixed(1)),
 
       ...groupTrainingTypeAvgScore,
     };
