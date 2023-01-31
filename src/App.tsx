@@ -2,7 +2,7 @@ import { useRef } from "react";
 
 import "./App.css";
 import TrainingReport, { ImperativeType } from "./components/TrainingReport";
-import { NewDummy } from "./dummy";
+import { NewDummyData, NewDummyChartData } from "./dummy";
 
 const App: React.FC = () => {
   const ref = useRef<ImperativeType>(null);
@@ -36,11 +36,12 @@ const App: React.FC = () => {
       </button>
       <TrainingReport
         ref={ref}
-        data={NewDummy}
-        meIndex={55}
+        data={NewDummyData}
+        chartData={NewDummyChartData}
+        meIndex={61}
         info={{
-          start_date: "2023-01-13",
-          end_date: "2023-01-20",
+          start_date: "2023-01-01",
+          end_date: "2023-01-31",
           agency_logo: "",
           language: "한국어",
         }}

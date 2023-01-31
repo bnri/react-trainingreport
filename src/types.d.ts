@@ -71,6 +71,8 @@ export interface ReportType {
   firstScoreDate: string;
   secondScore: number; // 기록2
   secondScoreDate: string;
+  monthScore: number;
+  monthScoreRank: number;
 
   dueScore: number; // 기간 내의 점수
 
@@ -170,16 +172,17 @@ export interface TrainingReportProps {
 }
 
 export interface TrainingResultType {
-  [x: string]: number;
+  [x: string]: string | number | null;
   testee_task_idx: number;
   tr_accuracyrate: number;
   tr_duration: number;
-  tr_feeling?: string;
+  tr_feeling?: string | null;
   tr_score: number;
   tr_starttime: string;
   tr_level: number;
   trainingresult_idx: number;
-  trainingtext_idx?: number;
+  trainingtext_idx?: number | null;
+  tt_domain?: string | null;
 }
 
 export interface TaskType {
@@ -192,6 +195,13 @@ export interface TaskType {
   task_type: taskTypes;
   testee_task_idx: number;
   trainingResult: { [key: string]: TrainingResultType[] };
+
+  testee_idx?: number;
+  trainingtask_idx?: number;
+  level_update_duration?: number;
+  task_basic_reculsivecount?: number;
+  changed_date?: string;
+  task_isdelete?: number;
 }
 
 export interface TesteeType {
@@ -211,11 +221,15 @@ export interface TesteeType {
   tts_secondscore_resetdate: string;
   tts_monthscore?: number;
   tts_totalscore?: number;
+  firstscoreRank?: number;
+  monthscoreRank?: number;
+  sentencemaskReadingCount?: number;
   user_ID: string;
 }
 
 export interface ReportProps {
   data: TesteeType[];
+  chartData: TaskType[];
   meIndex: number;
   info: {
     start_date: string;

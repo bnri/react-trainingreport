@@ -165,10 +165,13 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       totScore: trainingData[meIndex].tts_totalscore || 0,
       firstScore: trainingData[meIndex].tts_firstscore || 0,
       firstScoreDate: trainingData[meIndex].tts_firstscore_resetdate,
-      firstScoreRank: trainingData[meIndex].rank,
+      firstScoreRank: trainingData[meIndex].rank || 0,
 
       secondScore: trainingData[meIndex].tts_secondscore || 0,
       secondScoreDate: trainingData[meIndex].tts_secondscore_resetdate,
+
+      monthScore: trainingData[meIndex].tts_monthscore || 0,
+      monthScoreRank: trainingData[meIndex].monthscoreRank || 0,
 
       dueScore: 0,
       performedRatio: 0,
@@ -999,6 +1002,9 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           </StyledInfoText>
           <StyledInfoText>총 누적점수 : {data.totScore.toLocaleString()}점</StyledInfoText>
           <StyledInfoText>
+            월간 : {data.monthScore.toLocaleString()}점({data.monthScoreRank}위)
+          </StyledInfoText>
+          <StyledInfoText>
             기록 1 : {data.firstScore.toLocaleString()}점({data.firstScoreDate} 이후, {tier}, {data.firstScoreRank || 1}
             위)
           </StyledInfoText>
@@ -1282,7 +1288,7 @@ const StyledDueTitle = styled.h3`
 `;
 
 const StyledInfoBox = styled(StyledWrapper)`
-  height: 100px;
+  height: 120px;
   display: flex;
   align-items: center;
 `;
@@ -1297,7 +1303,7 @@ const StyledInfoLeftBox = styled.div`
 `;
 
 const StyledInfoText = styled.span`
-  height: 20%;
+  height: ${100 / 6}%;
   display: flex;
   align-items: center;
 `;
