@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import PDF, { preloadDone } from "../lib/pdf";
-import { ReportProps, ReportType, TrainingType, typenames } from "../types";
+import { ReportProps, ReportType, tasknames, tasktypes, TrainingType } from "../types";
 import { imgbase64forPDF } from "../lib/base64";
 import useTrainingLevelScoreChartDatas from "../hooks/useTrainingLevelScoreChartDatas";
 
@@ -14,10 +14,10 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Seoul");
 
-const makeTrainingObject = (type: typenames, language: "한국어" | "영어"): TrainingType => ({
-  type,
-  language: ["SentenceMask", "WordOrdering", "KeywordFinding", "CategoryFinding"].includes(type) ? language : "한국어",
-  // 모든 숫자들은 다 더해서 넣어두기, equalTypeCount로 나눠서 평균내기
+const makeTrainingObject = (type: { type: tasktypes; name: tasknames }, language: "한국어" | "영어"): TrainingType => ({
+  taskName: type.name,
+  taskType: type.type,
+  language: type.type === "Reading" || type.name === "SentenceTracking" ? language : "한국어",
   level: 0,
   reculsiveCount: 0,
   weeklyPerformedDays: 0,
@@ -46,23 +46,23 @@ export const getActiveDays = (dayofweek: string): boolean[] => {
 };
 
 const makeTrainingList = (language: "한국어" | "영어") => {
-  const typenameList: typenames[] = [
-    "SentenceMask",
-    "WordOrdering",
-    "KeywordFinding",
-    "CategoryFinding",
-    "VisualSpan",
-    "VisualCounting",
-    "TMT",
-    "Stroop",
-    "SaccadeTracking",
-    "PursuitTracking",
-    "AntiTracking",
-    "SentenceTracking",
-    "ExerciseHorizontal",
-    "ExerciseVertical",
-    "ExerciseHJump",
-    "ExerciseVJump",
+  const typenameList: { type: tasktypes; name: tasknames }[] = [
+    { type: "Reading", name: "SentenceMask" },
+    { type: "Reading", name: "WordOrdering" },
+    { type: "Reading", name: "KeywordFinding" },
+    { type: "Reading", name: "CategoryFinding" },
+    { type: "Cognitive", name: "VisualSpan" },
+    { type: "Cognitive", name: "VisualCounting" },
+    { type: "Cognitive", name: "TMT" },
+    { type: "Cognitive", name: "Stroop" },
+    { type: "Tracking", name: "SaccadeTracking" },
+    { type: "Tracking", name: "PursuitTracking" },
+    { type: "Tracking", name: "AntiTracking" },
+    { type: "Tracking", name: "SentenceTracking" },
+    { type: "Exercise", name: "ExerciseHorizontal" },
+    { type: "Exercise", name: "ExerciseVertical" },
+    { type: "Exercise", name: "ExerciseHJump" },
+    { type: "Exercise", name: "ExerciseVJump" },
   ];
   return typenameList.map((t) => makeTrainingObject(t, language));
 };
@@ -277,7 +277,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         ptr = ptr.add(1, "day");
       }
 
-      const findIndex = resultData.trainingList.findIndex((f) => f.type === task.task_name);
+      const findIndex = resultData.trainingList.findIndex((f) => f.taskName === task.task_name);
       if (findIndex === -1) {
         continue;
       }
@@ -327,7 +327,9 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     // 과제 없는건 없애버리기
     resultData.trainingList = resultData.trainingList.filter((f) => f.equalTypeCount !== 0);
 
-    // 그룹 점수 내기, 내꺼는 구해놨으니 초기화를 내꺼로
+    // 각 타입들의 평균 계산
+
+    // 그룹 점수 내기
     let groupPerformedCount = 0; // 수행률 계산, 그룹의 수행한 횟수
     let groupNeedPerformedCount = 0; // 수행률 계산, 수행했어야하는 횟수
 
@@ -414,7 +416,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       groupTotPerformedCount++;
     }
 
-    const groupTrainingTypeAvgScore: Record<typenames, number> = {
+    const groupTrainingTypeAvgScore: Record<tasknames, number> = {
       SentenceMask: 0,
       CategoryFinding: 0,
       KeywordFinding: 0,
@@ -437,7 +439,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
 
     for (let i = 0; i < typeList.length; i++) {
       // @ts-ignore;
-      const key: typenames = typeList[i];
+      const key: tasknames = typeList[i];
       if (groupScoreObject[key].cnt === 0) {
         groupTrainingTypeAvgScore[key] = 0;
       } else {
@@ -795,10 +797,10 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     if (!data) {
       return;
     }
-    const sm = data.trainingList.find((f) => f.type === "SentenceMask");
-    const wo = data.trainingList.find((f) => f.type === "WordOrdering");
-    const kf = data.trainingList.find((f) => f.type === "KeywordFinding");
-    const cf = data.trainingList.find((f) => f.type === "CategoryFinding");
+    const sm = data.trainingList.find((f) => f.taskName === "SentenceMask");
+    const wo = data.trainingList.find((f) => f.taskName === "WordOrdering");
+    const kf = data.trainingList.find((f) => f.taskName === "KeywordFinding");
+    const cf = data.trainingList.find((f) => f.taskName === "CategoryFinding");
 
     return {
       titleIndex: 0,
@@ -844,10 +846,10 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     if (!data) {
       return;
     }
-    const vs = data.trainingList.find((f) => f.type === "VisualSpan");
-    const vc = data.trainingList.find((f) => f.type === "VisualCounting");
-    const tmt = data.trainingList.find((f) => f.type === "TMT");
-    const st = data.trainingList.find((f) => f.type === "Stroop");
+    const vs = data.trainingList.find((f) => f.taskName === "VisualSpan");
+    const vc = data.trainingList.find((f) => f.taskName === "VisualCounting");
+    const tmt = data.trainingList.find((f) => f.taskName === "TMT");
+    const st = data.trainingList.find((f) => f.taskName === "Stroop");
 
     return {
       titleIndex: 1,
@@ -893,10 +895,10 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     if (!data) {
       return;
     }
-    const st = data.trainingList.find((f) => f.type === "SaccadeTracking");
-    const pt = data.trainingList.find((f) => f.type === "PursuitTracking");
-    const at = data.trainingList.find((f) => f.type === "AntiTracking");
-    const set = data.trainingList.find((f) => f.type === "SentenceTracking");
+    const st = data.trainingList.find((f) => f.taskName === "SaccadeTracking");
+    const pt = data.trainingList.find((f) => f.taskName === "PursuitTracking");
+    const at = data.trainingList.find((f) => f.taskName === "AntiTracking");
+    const set = data.trainingList.find((f) => f.taskName === "SentenceTracking");
 
     return {
       titleIndex: 2,
@@ -942,10 +944,10 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     if (!data) {
       return;
     }
-    const eh = data.trainingList.find((f) => f.type === "ExerciseHorizontal");
-    const ev = data.trainingList.find((f) => f.type === "ExerciseVertical");
-    const ehj = data.trainingList.find((f) => f.type === "ExerciseHJump");
-    const evj = data.trainingList.find((f) => f.type === "ExerciseVJump");
+    const eh = data.trainingList.find((f) => f.taskName === "ExerciseHorizontal");
+    const ev = data.trainingList.find((f) => f.taskName === "ExerciseVertical");
+    const ehj = data.trainingList.find((f) => f.taskName === "ExerciseHJump");
+    const evj = data.trainingList.find((f) => f.taskName === "ExerciseVJump");
 
     return {
       titleIndex: 3,
@@ -987,9 +989,11 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     };
   }, [resultChartTitle, exerciseChartData, commonResultChartOption]);
 
-  if (!data || !tier || !medal) {
+  if (!data || !tier || !medal || !dayCD || !weekCD) {
     return <></>;
   }
+
+  console.log("data", data);
 
   return (
     <StyledReport id="report">
@@ -1044,21 +1048,25 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         </StyledChartBox>
       </StyledChartWrapper>
       <StyledChartSpan>* 기관 평균 : 학생이 속한 기관({data.agencyName})의 전체 학생들의 평균 점수</StyledChartSpan>
-      <StyledScoreChartWrapper id="LevelScoreChart">
+      <StyledScoreChartWrapper id="reportScoreChart">
         <StyledScoreChartTitle>트레이닝 레벨스코어 추세</StyledScoreChartTitle>
         <StyledScoreChartBoxWrapper>
-          <StyledScoreChartBoxTitle>일별</StyledScoreChartBoxTitle>
+          <StyledScoreChartBoxTitle>
+            일별 ({dayDD.startDate} ~ {dayDD.endDate})
+          </StyledScoreChartBoxTitle>
           <StyledScoreChartBox>
             <Line data={dayCD} options={dayCO} />
           </StyledScoreChartBox>
         </StyledScoreChartBoxWrapper>
         <StyledScoreChartBoxWrapper>
-          <StyledScoreChartBoxTitle>주별</StyledScoreChartBoxTitle>
+          <StyledScoreChartBoxTitle>
+            주별 ({weekDD.startDate} ~ {weekDD.endDate})
+          </StyledScoreChartBoxTitle>
           <StyledScoreChartBox>
             <Line data={weekCD} options={weekCO} />
           </StyledScoreChartBox>
         </StyledScoreChartBoxWrapper>
-        <StyledScoreChartCaption>레벨과 수행점수가 반영된 점수입니다. 1레벨당 20점이 가산됩니다.(레벨스코어=점수+레벨x20)</StyledScoreChartCaption>
+        <StyledScoreChartCaption>* 레벨과 수행점수가 반영된 점수입니다. 1레벨당 20점이 가산됩니다. (레벨스코어 = 점수 + 레벨 x 20)</StyledScoreChartCaption>
       </StyledScoreChartWrapper>
       <StyledGridWrapper id="reportTable">
         <StyledGridTitle>개별 트레이닝 수행 결과</StyledGridTitle>
@@ -1096,7 +1104,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             </StyledGridCell>
           </StyledGridRow>
           {trainingTypes.map((t, i) => {
-            const find = data.trainingList.find((f) => f.type === t.split(" ").join(""));
+            const find = data.trainingList.find((f) => f.taskName === t.split(" ").join(""));
 
             if (!find) {
               return (
@@ -1162,6 +1170,42 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
               </StyledGridRow>
             );
           })}
+          <StyledGridRow>
+            <StyledGridCell
+              header
+              isMobileWidth={isMobileWidth}
+              style={{
+                gridRow: isMobileWidth ? "1/3" : "auto",
+              }}
+            >
+              전체 평균
+            </StyledGridCell>
+            <StyledGridCell header order={1} isMobileWidth={isMobileWidth}>
+              {parseFloat(data.trainingList[0].level.toFixed(1))}
+            </StyledGridCell>
+            <StyledGridCell header order={3} isMobileWidth={isMobileWidth}>
+              {parseFloat(data.trainingList[0].reculsiveCount.toFixed(1))}회
+            </StyledGridCell>
+            <StyledGridCell header order={4} isMobileWidth={isMobileWidth} style={{ display: isMobileWidth ? "none" : "flex" }}>
+              {parseFloat(data.trainingList[0].weeklyPerformedDays.toFixed(1))}일
+            </StyledGridCell>
+            <StyledGridCell header order={6} isMobileWidth={isMobileWidth}>
+              {parseFloat((data.trainingList[0].performedRatio * 100).toFixed(1))}%
+            </StyledGridCell>
+            <StyledGridCell header order={8} isMobileWidth={isMobileWidth}>
+              {parseFloat(data.trainingList[0].avgScore.toFixed(1))}점
+            </StyledGridCell>
+            <StyledGridCell header order={2} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}></StyledGridCell>
+            <StyledGridCell header order={5} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
+              {isMobileWidth ? `${data.trainingList[0].performedCount}회` : `${data.trainingList[0].performedCount} / ${data.trainingList[0].needPerformedCount}`}
+            </StyledGridCell>
+            <StyledGridCell header order={7} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
+              {parseFloat(data.trainingList[0].totDuration.toFixed(1))}분
+            </StyledGridCell>
+            <StyledGridCell header order={9} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
+              {parseFloat(data.trainingList[0].totScore.toFixed(1))}점
+            </StyledGridCell>
+          </StyledGridRow>
         </StyledGrid>
       </StyledGridWrapper>
       <StyledResultWrapper id="reportResult">
@@ -1386,6 +1430,7 @@ const StyledScoreChartTitle = styled(StyledHeaderTitle)``;
 const StyledScoreChartBoxWrapper = styled.div`
   width: 100%;
   height: 180px;
+  margin-bottom: 10px;
 `;
 const StyledScoreChartBoxTitle = styled.h3`
   font-size: 1.4em;

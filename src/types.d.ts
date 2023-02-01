@@ -1,4 +1,4 @@
-export type typenames =
+export type tasknames =
   | "SentenceMask"
   | "CategoryFinding"
   | "KeywordFinding"
@@ -16,30 +16,10 @@ export type typenames =
   | "ExerciseHJump"
   | "ExerciseVJump";
 
-export type taskNames =
-  | "SentenceMask"
-  | "CategoryFinding"
-  | "KeywordFinding"
-  | "WordOrdering"
-  | "VisualSpan"
-  | "VisualCounting"
-  | "TMT"
-  | "Stroop"
-  | "SaccadeTracking"
-  | "PursuitTracking"
-  | "AntiTracking"
-  | "SentenceTracking"
-  | "ExerciseHorizontal"
-  | "ExerciseVertical"
-  | "ExerciseHJump"
-  | "ExerciseVJump";
+export type tasktypes = "Reading" | "Cognitive" | "Tracking" | "Exercise";
 
-export type taskTypes = "Reading" | "Cognitive" | "Tracking" | "Exercise";
-
-export interface TrainingType {
-  type: typenames;
+interface CommonTrainingType {
   level: number;
-  language?: "한국어" | "영어";
   reculsiveCount: number; // 일 수행횟수(recul)
   weeklyPerformedDays: number; // 주당 수행일(dayofweek 개수)
   performedCount: number; // 수행횟수
@@ -49,8 +29,16 @@ export interface TrainingType {
   avgDuration: number; // 일 평균 수행 시간
   avgScore: number; // 평균점수
   totScore: number; // 총 획득 점수
+}
+
+export interface TrainingType extends CommonTrainingType {
+  taskName: tasknames;
+  taskType: tasktypes;
+  language?: "한국어" | "영어";
   equalTypeCount: number; // 이 type이 지금 몇 개 나왔는지
 }
+
+interface SummaryType extends CommonTrainingType {}
 
 export interface ReportType {
   agencyID: string;
@@ -86,6 +74,8 @@ export interface ReportType {
   durationTitle: string;
 
   trainingList: TrainingType[];
+  typeSummary: { [key: tasktypes]: CommonTrainingType };
+
   groupScoreList: {
     performedRatio: number;
     avgScore: number;
@@ -130,7 +120,7 @@ export interface TaskListType {
   task_level: number | null;
   task_reculsivecount: number | null;
   task_startdate: string | null;
-  task_type: typenames | null;
+  task_type: tasknames | null;
   testee_idx: number;
   trainingtask_idx: number | null; // 얘가 null이면 idx 제외하고 다 null임
 }
@@ -191,8 +181,8 @@ export interface TaskType {
   language: "한국어" | "영어";
   level: number;
   reculsivecount: number;
-  task_name: taskNames;
-  task_type: taskTypes;
+  task_name: tasknames;
+  task_type: tasktypes;
   testee_task_idx: number;
   trainingResult: { [key: string]: TrainingResultType[] };
 

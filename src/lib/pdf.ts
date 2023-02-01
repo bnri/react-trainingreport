@@ -611,7 +611,7 @@ export default class PDF {
                 })),
               ],
               ...typenameList.map((type) => {
-                const hasType = this.data.trainingList.find((f) => f.type === type.replace(" ", ""));
+                const hasType = this.data.trainingList.find((f) => f.taskName === type.replace(" ", ""));
                 if (hasType) {
                   return [
                     { style: "tableItem", text: type },
