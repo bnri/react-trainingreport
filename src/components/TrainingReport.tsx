@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
-import { Doughnut, Radar } from "react-chartjs-2";
+import { Doughnut, Line, Radar } from "react-chartjs-2";
 import "chartjs-plugin-doughnutlabel";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
@@ -8,6 +8,7 @@ import utc from "dayjs/plugin/utc";
 import PDF, { preloadDone } from "../lib/pdf";
 import { ReportProps, ReportType, TrainingType, typenames } from "../types";
 import { imgbase64forPDF } from "../lib/base64";
+import useTrainingLevelScoreChartDatas from "../hooks/useTrainingLevelScoreChartDatas";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -73,10 +74,15 @@ export interface ImperativeType {
 }
 
 const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
-  const { data: trainingData, meIndex, info } = props;
+  const { data: trainingData, meIndex, info, chartData } = props;
   const [isMobileWidth, setIsMobileWidth] = useState<boolean>(false);
   const [data, setData] = useState<ReportType>();
   const [pdf, setPdf] = useState<PDF>();
+
+  // @ts-ignore
+  const { chartData: dayCD, chartOption: dayCO, dueDate: dayDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 1 });
+  // @ts-ignore
+  const { chartData: weekCD, chartOption: weekCO, dueDate: weekDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 2 });
 
   const tier = useMemo(() => {
     if (!data) {
@@ -782,7 +788,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       return;
     }
 
-    return ["Reading Training", "Cognitive Training", "Tracking Training", "Exercise Training"];
+    return ["Reading Type", "Cognitive Type", "Tracking Type", "Exercise Type"];
   }, [data]);
 
   const readingChartData = useMemo(() => {
@@ -1002,7 +1008,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           </StyledInfoText>
           <StyledInfoText>총 누적점수 : {data.totScore.toLocaleString()}점</StyledInfoText>
           <StyledInfoText>
-            월간 : {data.monthScore.toLocaleString()}점({data.monthScoreRank}위)
+            월간점수 : {data.monthScore.toLocaleString()}점({dayjs().format("YY년MM월,")} {data.monthScoreRank}위)
           </StyledInfoText>
           <StyledInfoText>
             기록 1 : {data.firstScore.toLocaleString()}점({data.firstScoreDate} 이후, {tier}, {data.firstScoreRank || 1}
@@ -1038,8 +1044,24 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         </StyledChartBox>
       </StyledChartWrapper>
       <StyledChartSpan>* 기관 평균 : 학생이 속한 기관({data.agencyName})의 전체 학생들의 평균 점수</StyledChartSpan>
+      <StyledScoreChartWrapper id="LevelScoreChart">
+        <StyledScoreChartTitle>트레이닝 레벨스코어 추세</StyledScoreChartTitle>
+        <StyledScoreChartBoxWrapper>
+          <StyledScoreChartBoxTitle>일별</StyledScoreChartBoxTitle>
+          <StyledScoreChartBox>
+            <Line data={dayCD} options={dayCO} />
+          </StyledScoreChartBox>
+        </StyledScoreChartBoxWrapper>
+        <StyledScoreChartBoxWrapper>
+          <StyledScoreChartBoxTitle>주별</StyledScoreChartBoxTitle>
+          <StyledScoreChartBox>
+            <Line data={weekCD} options={weekCO} />
+          </StyledScoreChartBox>
+        </StyledScoreChartBoxWrapper>
+        <StyledScoreChartCaption>레벨과 수행점수가 반영된 점수입니다. 1레벨당 20점이 가산됩니다.(레벨스코어=점수+레벨x20)</StyledScoreChartCaption>
+      </StyledScoreChartWrapper>
       <StyledGridWrapper id="reportTable">
-        <StyledGridTitle>개별 Training 수행 결과</StyledGridTitle>
+        <StyledGridTitle>개별 트레이닝 수행 결과</StyledGridTitle>
         <StyledGrid>
           <StyledGridRow isMobileWidth={isMobileWidth}>
             <StyledGridCell header isMobileWidth={isMobileWidth} style={{ gridRow: isMobileWidth ? "1/3" : "auto" }}>
@@ -1143,13 +1165,13 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         </StyledGrid>
       </StyledGridWrapper>
       <StyledResultWrapper id="reportResult">
-        <StyledResultTitle>개별 Training 수행 결과</StyledResultTitle>
+        <StyledResultTitle>개별 트레이닝 수행 결과</StyledResultTitle>
         <StyledResultRow>
           <StyledResultChartBox>
             <Radar id="ReadingChart" data={readingChartData} options={readingChartOptions} datasetKeyProvider={datasetKeyProvider} />
           </StyledResultChartBox>
           <StyledResultTextBox>
-            <StyledResultTextTitle>Reading Training</StyledResultTextTitle>
+            <StyledResultTextTitle>Reading Type</StyledResultTextTitle>
             <StyledResultText>
               <span>&nbsp;읽기를 기반으로 속도 제어, 안정성 향상, 문장 완성, 어휘의 탐색 및 판단 능력을 향상시키는 훈련입니다.</span>
               <ul>
@@ -1167,7 +1189,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             <Radar id="CognitiveChart" data={cognitiveChartData} options={cognitiveChartOption} datasetKeyProvider={datasetKeyProvider} />
           </StyledResultChartBox>
           <StyledResultTextBox>
-            <StyledResultTextTitle>Cognitive Training</StyledResultTextTitle>
+            <StyledResultTextTitle>Cognitive Type</StyledResultTextTitle>
             <StyledResultText>
               <span>&nbsp;학습의 기초가 되는 시지각, 인지능력, 판단력 및 행동 제어 능력을 향상시키는 훈련입니다.</span>
               <ul>
@@ -1185,7 +1207,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             <Radar id="TrackingChart" data={trackingChartData} options={trackingChartOption} datasetKeyProvider={datasetKeyProvider} />
           </StyledResultChartBox>
           <StyledResultTextBox>
-            <StyledResultTextTitle>Tracking Training</StyledResultTextTitle>
+            <StyledResultTextTitle>Tracking Type</StyledResultTextTitle>
             <StyledResultText>
               <span>&nbsp;읽기와 시지각의 기본이 되는 안구운동의 제어와 통제, 지각 집중력을 향상시킵니다. 시선추적장치를 활용하며, 게임 형식으로 진행합니다.</span>
               <ul>
@@ -1203,7 +1225,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             <Radar id="ExerciseChart" data={exerciseChartData} options={exerciseChartOption} datasetKeyProvider={datasetKeyProvider} />
           </StyledResultChartBox>
           <StyledResultTextBox>
-            <StyledResultTextTitle>Exercise Training</StyledResultTextTitle>
+            <StyledResultTextTitle>Exercise Type</StyledResultTextTitle>
             <StyledResultText>
               <span>&nbsp;읽기 과정의 핵심 시선이동인 도약안구운동(saccade)을 빠르고 정확하게 훈련합니다. 시선추적장치를 활용합니다.</span>
               <ul>
@@ -1356,6 +1378,26 @@ const StyledChart = styled.div`
 `;
 
 const StyledChartSpan = styled.span`
+  font-size: 1.2em;
+`;
+
+const StyledScoreChartWrapper = styled(StyledWrapper)``;
+const StyledScoreChartTitle = styled(StyledHeaderTitle)``;
+const StyledScoreChartBoxWrapper = styled.div`
+  width: 100%;
+  height: 180px;
+`;
+const StyledScoreChartBoxTitle = styled.h3`
+  font-size: 1.4em;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  margin: 0;
+`;
+const StyledScoreChartBox = styled.div`
+  height: 150px;
+`;
+const StyledScoreChartCaption = styled.span`
   font-size: 1.2em;
 `;
 
