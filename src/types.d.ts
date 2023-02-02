@@ -75,6 +75,7 @@ export interface ReportType {
 
   trainingList: TrainingType[];
   typeSummary: {
+    All: CommonTrainingType;
     Reading: CommonTrainingType;
     Cognitive: CommonTrainingType;
     Tracking: CommonTrainingType;
@@ -221,6 +222,13 @@ export interface TesteeType {
   monthscoreRank?: number;
   sentencemaskReadingCount?: number;
   user_ID: string;
+  sentencemask_analysis?: {
+    recentReadingSpeed: { reading_speed: number };
+    recentSMReadingSpeed: number;
+    readingCount: number;
+    agencyAvgReadingCount: number;
+    domainCount: { science: number; social: number; literature: number; etc: number };
+  };
 }
 
 export interface ReportProps {
