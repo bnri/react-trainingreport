@@ -74,7 +74,13 @@ export interface ReportType {
   durationTitle: string;
 
   trainingList: TrainingType[];
-  typeSummary: { [key: tasktypes]: CommonTrainingType };
+  typeSummary: {
+    Reading: CommonTrainingType;
+    Cognitive: CommonTrainingType;
+    Tracking: CommonTrainingType;
+    Exercise: CommonTrainingType;
+    [key: string]: CommonTrainingType;
+  };
 
   groupScoreList: {
     performedRatio: number;

@@ -67,6 +67,19 @@ const makeTrainingList = (language: "한국어" | "영어") => {
   return typenameList.map((t) => makeTrainingObject(t, language));
 };
 
+const makeTrainingTypeObject = () => ({
+  level: 0,
+  reculsiveCount: 0, // 일 수행횟수(recul)
+  weeklyPerformedDays: 0, // 주당 수행일(dayofweek 개수)
+  performedCount: 0, // 수행횟수
+  needPerformedCount: 0, // 수행해야하는 횟수
+  performedRatio: 0, // 수행률
+  totDuration: 0, // 총 수행시간
+  avgDuration: 0, // 일 평균 수행 시간
+  avgScore: 0, // 평균점수
+  totScore: 0, // 총 획득 점수
+});
+
 export interface ImperativeType {
   isPossibleMakePDF: () => boolean;
   generatePDF: () => Promise<boolean>;
@@ -185,6 +198,13 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       avgDuration: 0,
 
       trainingList: makeTrainingList(info.language),
+      typeSummary: {
+        All: makeTrainingTypeObject(),
+        Reading: makeTrainingTypeObject(),
+        Cognitive: makeTrainingTypeObject(),
+        Tracking: makeTrainingTypeObject(),
+        Exercise: makeTrainingTypeObject(),
+      },
     };
 
     // 그룹의 총 점수 계산
@@ -211,7 +231,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     let myNeedPerformedCount = 0; // 수행률 계산, 수행했어야하는 횟수
 
     let myTotScore = 0; // 수행 총 점수
-    let myTotAvgScore = 0; // 수행 평균점수들의 합
+    // let myTotAvgScore = 0; // 수행 평균점수들의 합
     let myTotAvgDuration = 0; // 수행 평균시간들의 합
 
     // 일단 내 점수부터
@@ -220,7 +240,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
 
     const myTaskList = trainingData[meIndex].taskList;
 
-    let myChartCount = 0; // 차트에 필요한 평균을 낼 개수
+    // let myChartCount = 0; // 차트에 필요한 평균을 낼 개수
     let groupChartCount = 0;
 
     const myResultObj: { [key: string]: { duration: number } } = {};
@@ -304,7 +324,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         resultData.trainingList[findIndex].avgScore = parseFloat((taskTotScore / performedCount).toFixed(1));
         resultData.trainingList[findIndex].avgDuration = parseFloat((taskTotDuration / (performedDayCount || 1)).toFixed(1));
 
-        myChartCount++;
+        // myChartCount++;
       }
 
       myPerformedCount += performedCount; // 내 총 수행횟수
@@ -328,6 +348,68 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     resultData.trainingList = resultData.trainingList.filter((f) => f.equalTypeCount !== 0);
 
     // 각 타입들의 평균 계산
+
+    const typeCount: { [key: string]: number } = { Reading: 0, Cognitive: 0, Tracking: 0, Exercise: 0 };
+    for (let i = 0; i < resultData.trainingList.length; i++) {
+      const { taskType } = resultData.trainingList[i];
+      const tl = resultData.trainingList[i];
+
+      resultData.typeSummary[taskType].level += tl.level;
+      resultData.typeSummary[taskType].reculsiveCount += tl.reculsiveCount; // 일 수행횟수(recul)
+      resultData.typeSummary[taskType].weeklyPerformedDays += tl.weeklyPerformedDays; // 주당 수행일(dayofweek 개수)
+      resultData.typeSummary[taskType].performedCount += tl.performedCount; // 수행횟수
+      resultData.typeSummary[taskType].needPerformedCount += tl.needPerformedCount; // 수행해야하는 횟수
+      resultData.typeSummary[taskType].performedRatio += tl.performedRatio; // 수행률
+      resultData.typeSummary[taskType].totDuration += tl.totDuration; // 총 수행시간
+      resultData.typeSummary[taskType].avgDuration += tl.avgDuration; // 일 평균 수행 시간
+      resultData.typeSummary[taskType].avgScore += tl.avgScore; // 평균점수
+      resultData.typeSummary[taskType].totScore += tl.totScore; // 총 획득 점수
+
+      resultData.typeSummary.All.level += tl.level;
+      resultData.typeSummary.All.reculsiveCount += tl.reculsiveCount; // 일 수행횟수(recul)
+      resultData.typeSummary.All.weeklyPerformedDays += tl.weeklyPerformedDays; // 주당 수행일(dayofweek 개수)
+      resultData.typeSummary.All.performedCount += tl.performedCount; // 수행횟수
+      resultData.typeSummary.All.needPerformedCount += tl.needPerformedCount; // 수행해야하는 횟수
+      resultData.typeSummary.All.performedRatio += tl.performedRatio; // 수행률
+      resultData.typeSummary.All.totDuration += tl.totDuration; // 총 수행시간
+      resultData.typeSummary.All.avgDuration += tl.avgDuration; // 일 평균 수행 시간
+      resultData.typeSummary.All.avgScore += tl.avgScore; // 평균점수
+      resultData.typeSummary.All.totScore += tl.totScore; // 총 획득 점수
+
+      typeCount[taskType]++;
+    }
+
+    let totTaskCount = 0;
+    for (const type in typeCount) {
+      if (typeCount[type] === 0) {
+        continue;
+      }
+      totTaskCount += typeCount[type];
+      const rt = resultData.typeSummary[type];
+      rt.level = +(rt.level / typeCount[type]).toFixed(1);
+      rt.reculsiveCount = +(rt.reculsiveCount / typeCount[type]).toFixed(1); // 일 수행횟수(recul)
+      rt.weeklyPerformedDays = +(rt.weeklyPerformedDays / typeCount[type]).toFixed(1); // 주당 수행일(dayofweek 개수)
+      rt.performedCount = +(rt.performedCount / typeCount[type]).toFixed(1); // 수행횟수
+      rt.needPerformedCount = +(rt.needPerformedCount / typeCount[type]).toFixed(1); // 수행해야하는 횟수
+      rt.performedRatio = +(rt.performedRatio / typeCount[type]).toFixed(4); // 수행률
+      rt.totDuration = +(rt.totDuration / typeCount[type]).toFixed(1); // 총 수행시간
+      rt.avgDuration = +(rt.avgDuration / typeCount[type]).toFixed(1); // 일 평균 수행 시간
+      rt.avgScore = +(rt.avgScore / typeCount[type]).toFixed(1); // 평균점수
+      rt.totScore = +(rt.totScore / typeCount[type]).toFixed(1); // 총 획득 점수
+    }
+
+    const all = resultData.typeSummary.All;
+
+    all.level = +(all.level / (totTaskCount || 1)).toFixed(1);
+    all.reculsiveCount = +(all.reculsiveCount / (totTaskCount || 1)).toFixed(1); // 일 수행횟수(recul)
+    all.weeklyPerformedDays = +(all.weeklyPerformedDays / (totTaskCount || 1)).toFixed(1); // 주당 수행일(dayofweek 개수)
+    all.performedCount = +(all.performedCount / (totTaskCount || 1)).toFixed(1); // 수행횟수
+    all.needPerformedCount = +(all.needPerformedCount / (totTaskCount || 1)).toFixed(1); // 수행해야하는 횟수
+    all.performedRatio = +(all.performedRatio / (totTaskCount || 1)).toFixed(4); // 수행률
+    all.totDuration = +(all.totDuration / (totTaskCount || 1)).toFixed(1); // 총 수행시간
+    all.avgDuration = +(all.avgDuration / (totTaskCount || 1)).toFixed(1); // 일 평균 수행 시간
+    all.avgScore = +(all.avgScore / (totTaskCount || 1)).toFixed(1); // 평균점수
+    all.totScore = +(all.totScore / (totTaskCount || 1)).toFixed(1); // 총 획득 점수
 
     // 그룹 점수 내기
     let groupPerformedCount = 0; // 수행률 계산, 그룹의 수행한 횟수
@@ -1181,29 +1263,29 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
               전체 평균
             </StyledGridCell>
             <StyledGridCell header order={1} isMobileWidth={isMobileWidth}>
-              {parseFloat(data.trainingList[0].level.toFixed(1))}
+              {parseFloat(data.typeSummary.All.level.toFixed(1))}
             </StyledGridCell>
             <StyledGridCell header order={3} isMobileWidth={isMobileWidth}>
-              {parseFloat(data.trainingList[0].reculsiveCount.toFixed(1))}회
+              {parseFloat(data.typeSummary.All.reculsiveCount.toFixed(1))}회
             </StyledGridCell>
             <StyledGridCell header order={4} isMobileWidth={isMobileWidth} style={{ display: isMobileWidth ? "none" : "flex" }}>
-              {parseFloat(data.trainingList[0].weeklyPerformedDays.toFixed(1))}일
+              {parseFloat(data.typeSummary.All.weeklyPerformedDays.toFixed(1))}일
             </StyledGridCell>
             <StyledGridCell header order={6} isMobileWidth={isMobileWidth}>
-              {parseFloat((data.trainingList[0].performedRatio * 100).toFixed(1))}%
+              {parseFloat((data.typeSummary.All.performedRatio * 100).toFixed(1))}%
             </StyledGridCell>
             <StyledGridCell header order={8} isMobileWidth={isMobileWidth}>
-              {parseFloat(data.trainingList[0].avgScore.toFixed(1))}점
+              {parseFloat(data.typeSummary.All.avgScore.toFixed(1))}점
             </StyledGridCell>
-            <StyledGridCell header order={2} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}></StyledGridCell>
-            <StyledGridCell header order={5} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
-              {isMobileWidth ? `${data.trainingList[0].performedCount}회` : `${data.trainingList[0].performedCount} / ${data.trainingList[0].needPerformedCount}`}
+            <StyledGridCell header order={2} isMobileWidth={isMobileWidth}></StyledGridCell>
+            <StyledGridCell header order={5} isMobileWidth={isMobileWidth}>
+              {isMobileWidth ? `${data.typeSummary.All.performedCount}회` : `${data.typeSummary.All.performedCount} / ${data.typeSummary.All.needPerformedCount}`}
             </StyledGridCell>
-            <StyledGridCell header order={7} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
-              {parseFloat(data.trainingList[0].totDuration.toFixed(1))}분
+            <StyledGridCell header order={7} isMobileWidth={isMobileWidth}>
+              {parseFloat(data.typeSummary.All.totDuration.toFixed(1))}분
             </StyledGridCell>
-            <StyledGridCell header order={9} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
-              {parseFloat(data.trainingList[0].totScore.toFixed(1))}점
+            <StyledGridCell header order={9} isMobileWidth={isMobileWidth}>
+              {parseFloat(data.typeSummary.All.totScore.toFixed(1))}점
             </StyledGridCell>
           </StyledGridRow>
         </StyledGrid>
