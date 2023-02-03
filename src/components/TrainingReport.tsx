@@ -9,6 +9,7 @@ import PDF, { preloadDone } from "../lib/pdf";
 import { ReportProps, ReportType, tasknames, tasktypes, TrainingType } from "../types";
 import { imgbase64forPDF } from "../lib/base64";
 import useTrainingLevelScoreChartDatas from "../hooks/useTrainingLevelScoreChartDatas";
+import GridRow from "./GridRow";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -93,9 +94,9 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
   const [pdf, setPdf] = useState<PDF>();
 
   // @ts-ignore
-  const { chartData: dayCD, chartOption: dayCO, dueDate: dayDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 1 });
+  const { chartData: dayCD, chartOption: dayCO, dueDate: dayDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 1, startDate: info.start_date, endDate: info.end_date });
   // @ts-ignore
-  const { chartData: weekCD, chartOption: weekCO, dueDate: weekDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 2 });
+  const { chartData: weekCD, chartOption: weekCO, dueDate: weekDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 2, startDate: info.start_date, endDate: info.end_date });
 
   const tier = useMemo(() => {
     if (!data) {
@@ -574,7 +575,24 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
   }, [trainingData, meIndex, info]);
 
   const trainingTypes = useMemo(() => {
-    return ["Sentence Mask", "Word Ordering", "Keyword Finding", "Category Finding", "Visual Span", "Visual Counting", "TMT", "Stroop", "Saccade Tracking", "Pursuit Tracking", "Anti Tracking", "Sentence Tracking", "Exercise Horizontal", "Exercise Vertical", "Exercise HJump", "Exercise VJump"];
+    return [
+      {
+        type: "Reading",
+        names: ["Sentence Mask", "Word Ordering", "Keyword Finding", "Category Finding"],
+      },
+      {
+        type: "Cognitive",
+        names: ["Visual Span", "Visual Counting", "TMT", "Stroop"],
+      },
+      {
+        type: "Tracking",
+        names: ["Saccade Tracking", "Pursuit Tracking", "Anti Tracking", "Sentence Tracking"],
+      },
+      {
+        type: "Exercise",
+        names: ["Exercise Horizontal", "Exercise Vertical", "Exercise HJump", "Exercise VJump"],
+      },
+    ];
   }, []);
 
   const commonChartOption = useMemo(() => {
@@ -1110,24 +1128,27 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         </StyledInfoRightBox>
       </StyledInfoBox>
       <StyledChartWrapper id="reportChart">
-        <StyledChartBox>
-          <StyledChartTitle>수행률</StyledChartTitle>
-          <StyledChart>
-            <Doughnut id="RatioChart" data={ratioChartData} options={ratioChartOptions} datasetKeyProvider={datasetKeyProvider} />
-          </StyledChart>
-        </StyledChartBox>
-        <StyledChartBox>
-          <StyledChartTitle>평균 수행 점수</StyledChartTitle>
-          <StyledChart>
-            <Doughnut id="AvgScoreChart" data={avgScoreChartData} options={avgScoreChartOptions} datasetKeyProvider={datasetKeyProvider} />
-          </StyledChart>
-        </StyledChartBox>
-        <StyledChartBox>
-          <StyledChartTitle>일 평균 수행 시간</StyledChartTitle>
-          <StyledChart>
-            <Doughnut id="AvgDurationChart" data={avgDurationChartData} options={avgDurationChartOptions} datasetKeyProvider={datasetKeyProvider} />
-          </StyledChart>
-        </StyledChartBox>
+        <StyledChartTitle>트레이닝 수행 현황</StyledChartTitle>
+        <StyledChartBoxWrapper>
+          <StyledChartBox>
+            <StyledChartBoxTitle>수행률</StyledChartBoxTitle>
+            <StyledChart>
+              <Doughnut id="RatioChart" data={ratioChartData} options={ratioChartOptions} datasetKeyProvider={datasetKeyProvider} />
+            </StyledChart>
+          </StyledChartBox>
+          <StyledChartBox>
+            <StyledChartBoxTitle>평균 수행 점수</StyledChartBoxTitle>
+            <StyledChart>
+              <Doughnut id="AvgScoreChart" data={avgScoreChartData} options={avgScoreChartOptions} datasetKeyProvider={datasetKeyProvider} />
+            </StyledChart>
+          </StyledChartBox>
+          <StyledChartBox>
+            <StyledChartBoxTitle>일 평균 수행 시간</StyledChartBoxTitle>
+            <StyledChart>
+              <Doughnut id="AvgDurationChart" data={avgDurationChartData} options={avgDurationChartOptions} datasetKeyProvider={datasetKeyProvider} />
+            </StyledChart>
+          </StyledChartBox>
+        </StyledChartBoxWrapper>
       </StyledChartWrapper>
       <StyledChartSpan>* 기관 평균 : 학생이 속한 기관({data.agencyName})의 전체 학생들의 평균 점수</StyledChartSpan>
       <StyledScoreChartWrapper id="reportScoreChart">
@@ -1186,110 +1207,29 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             </StyledGridCell>
           </StyledGridRow>
           {trainingTypes.map((t, i) => {
-            const find = data.trainingList.find((f) => f.taskName === t.split(" ").join(""));
+            const returnComponents = [];
 
-            if (!find) {
-              return (
-                <StyledGridRow key={`row_${i}`}>
-                  <StyledGridCell
-                    isMobileWidth={isMobileWidth}
-                    style={{
-                      gridRow: isMobileWidth ? "1/3" : "auto",
-                    }}
-                  >
-                    {t}
-                  </StyledGridCell>
-                  <StyledGridCell
-                    isMobileWidth={isMobileWidth}
-                    style={{
-                      gridRow: isMobileWidth ? "1/3" : "auto",
-                      gridColumn: isMobileWidth ? "2/6" : "2/11",
-                    }}
-                  >
-                    수행 없음
-                  </StyledGridCell>
-                </StyledGridRow>
-              );
-            }
-
-            return (
-              <StyledGridRow key={`row_${i}`}>
-                <StyledGridCell
-                  isMobileWidth={isMobileWidth}
-                  style={{
-                    gridRow: isMobileWidth ? "1/3" : "auto",
-                  }}
-                >
-                  {t}
-                </StyledGridCell>
-                <StyledGridCell order={1} isMobileWidth={isMobileWidth}>
-                  {parseFloat(find.level.toFixed(1))}
-                </StyledGridCell>
-                <StyledGridCell order={3} isMobileWidth={isMobileWidth}>
-                  {parseFloat(find.reculsiveCount.toFixed(1))}회
-                </StyledGridCell>
-                <StyledGridCell order={4} isMobileWidth={isMobileWidth} style={{ display: isMobileWidth ? "none" : "flex" }}>
-                  {parseFloat(find.weeklyPerformedDays.toFixed(1))}일
-                </StyledGridCell>
-                <StyledGridCell order={6} isMobileWidth={isMobileWidth}>
-                  {parseFloat((find.performedRatio * 100).toFixed(1))}%
-                </StyledGridCell>
-                <StyledGridCell order={8} isMobileWidth={isMobileWidth}>
-                  {parseFloat(find.avgScore.toFixed(1))}점
-                </StyledGridCell>
-                <StyledGridCell order={2} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
-                  {find.language}
-                </StyledGridCell>
-                <StyledGridCell order={5} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
-                  {isMobileWidth ? `${find.performedCount}회` : `${find.performedCount} / ${find.needPerformedCount}`}
-                </StyledGridCell>
-                <StyledGridCell order={7} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
-                  {parseFloat(find.totDuration.toFixed(1))}분
-                </StyledGridCell>
-                <StyledGridCell order={9} isMobileWidth={isMobileWidth} style={{ background: isMobileWidth ? "#eeedff" : "transparent" }}>
-                  {parseFloat(find.totScore.toFixed(1))}점
-                </StyledGridCell>
-              </StyledGridRow>
+            returnComponents.push(
+              t.names.map((task, j) => {
+                const find = data.trainingList.find((f) => f.taskName === task.split(" ").join(""));
+                return <GridRow key={`grid_${i}_${j}`} find={find} isMobileWidth={isMobileWidth} task={task} />;
+              })
             );
+            returnComponents.push(<GridRow key={`grid_${i}`} header={true} isMobileWidth={isMobileWidth} find={data.typeSummary[t.type]} task={`${t.type} 평균`} />);
+            return returnComponents;
           })}
-          <StyledGridRow>
-            <StyledGridCell
-              header
-              isMobileWidth={isMobileWidth}
-              style={{
-                gridRow: isMobileWidth ? "1/3" : "auto",
-              }}
-            >
-              전체 평균
-            </StyledGridCell>
-            <StyledGridCell header order={1} isMobileWidth={isMobileWidth}>
-              {parseFloat(data.typeSummary.All.level.toFixed(1))}
-            </StyledGridCell>
-            <StyledGridCell header order={3} isMobileWidth={isMobileWidth}>
-              {parseFloat(data.typeSummary.All.reculsiveCount.toFixed(1))}회
-            </StyledGridCell>
-            <StyledGridCell header order={4} isMobileWidth={isMobileWidth} style={{ display: isMobileWidth ? "none" : "flex" }}>
-              {parseFloat(data.typeSummary.All.weeklyPerformedDays.toFixed(1))}일
-            </StyledGridCell>
-            <StyledGridCell header order={6} isMobileWidth={isMobileWidth}>
-              {parseFloat((data.typeSummary.All.performedRatio * 100).toFixed(1))}%
-            </StyledGridCell>
-            <StyledGridCell header order={8} isMobileWidth={isMobileWidth}>
-              {parseFloat(data.typeSummary.All.avgScore.toFixed(1))}점
-            </StyledGridCell>
-            <StyledGridCell header order={2} isMobileWidth={isMobileWidth}></StyledGridCell>
-            <StyledGridCell header order={5} isMobileWidth={isMobileWidth}>
-              {isMobileWidth ? `${data.typeSummary.All.performedCount}회` : `${data.typeSummary.All.performedCount} / ${data.typeSummary.All.needPerformedCount}`}
-            </StyledGridCell>
-            <StyledGridCell header order={7} isMobileWidth={isMobileWidth}>
-              {parseFloat(data.typeSummary.All.totDuration.toFixed(1))}분
-            </StyledGridCell>
-            <StyledGridCell header order={9} isMobileWidth={isMobileWidth}>
-              {parseFloat(data.typeSummary.All.totScore.toFixed(1))}점
-            </StyledGridCell>
-          </StyledGridRow>
+          <GridRow header={true} isMobileWidth={isMobileWidth} find={data.typeSummary.All} task={`전체 평균`} />
         </StyledGrid>
       </StyledGridWrapper>
+      <StyledSentenceMaskAnalysisWrapper>
+        <StyledSentenceMaskAnalysisTitle>글 읽기 트레이닝 분석</StyledSentenceMaskAnalysisTitle>
+        <StyledSentenceMaskAnalysisBoxWrapper>
+          <StyledSentenceMaskAnalysisBox>읽은글</StyledSentenceMaskAnalysisBox>
+          <StyledSentenceMaskAnalysisChartBox>읽은 글의 종류</StyledSentenceMaskAnalysisChartBox>
+          <StyledSentenceMaskAnalysisBox>읽은글 정보</StyledSentenceMaskAnalysisBox>
+        </StyledSentenceMaskAnalysisBoxWrapper>
+        <StyledSentenceMaskAnalysisCaption>* Sentence Mask를 통해 제공된 읽기 자료입니다.</StyledSentenceMaskAnalysisCaption>
+      </StyledSentenceMaskAnalysisWrapper>
       <StyledResultWrapper id="reportResult">
         <StyledResultTitle>개별 트레이닝 수행 결과</StyledResultTitle>
         <StyledResultRow>
@@ -1468,8 +1408,9 @@ const StyledInfoRightBox = styled.div`
     height: 100%;
   }
 `;
-
-const StyledChartWrapper = styled(StyledWrapper)`
+const StyledChartWrapper = styled.div``;
+const StyledChartTitle = styled(StyledHeaderTitle)``;
+const StyledChartBoxWrapper = styled(StyledWrapper)`
   display: flex;
   flex-flow: row wrap;
   justify-content: center;
@@ -1478,7 +1419,7 @@ const StyledChartWrapper = styled(StyledWrapper)`
 `;
 
 const StyledChartBox = styled.div`
-  width: 250px;
+  width: 300px;
   height: 300px;
   display: flex;
   flex-direction: column;
@@ -1487,7 +1428,7 @@ const StyledChartBox = styled.div`
   border: 1px solid #aaa9bc;
 `;
 
-const StyledChartTitle = styled.h3`
+const StyledChartBoxTitle = styled.h3`
   width: 100%;
   height: 30px;
   display: flex;
@@ -1511,7 +1452,7 @@ const StyledScoreChartWrapper = styled(StyledWrapper)``;
 const StyledScoreChartTitle = styled(StyledHeaderTitle)``;
 const StyledScoreChartBoxWrapper = styled.div`
   width: 100%;
-  height: 180px;
+  height: 230px;
   margin-bottom: 10px;
 `;
 const StyledScoreChartBoxTitle = styled.h3`
@@ -1522,7 +1463,7 @@ const StyledScoreChartBoxTitle = styled.h3`
   margin: 0;
 `;
 const StyledScoreChartBox = styled.div`
-  height: 150px;
+  height: 200px;
 `;
 const StyledScoreChartCaption = styled.span`
   font-size: 1.2em;
@@ -1539,7 +1480,7 @@ const StyledGrid = styled.div`
   border-collapse: collapse;
 `;
 
-interface GridProps {
+export interface GridProps {
   display?: string;
   order?: number;
   header?: boolean;
@@ -1595,6 +1536,18 @@ const StyledGridCell = styled.div<GridProps>`
           order: ${props.order};
         `
       : css``}
+`;
+
+const StyledSentenceMaskAnalysisWrapper = styled(StyledWrapper)``;
+const StyledSentenceMaskAnalysisTitle = styled(StyledHeaderTitle)``;
+const StyledSentenceMaskAnalysisBoxWrapper = styled.div`
+  display: flex;
+  gap: 1em;
+`;
+const StyledSentenceMaskAnalysisBox = styled.div``;
+const StyledSentenceMaskAnalysisChartBox = styled.div``;
+const StyledSentenceMaskAnalysisCaption = styled.span`
+  font-size: 1.2em;
 `;
 
 const StyledResultWrapper = styled(StyledWrapper)`

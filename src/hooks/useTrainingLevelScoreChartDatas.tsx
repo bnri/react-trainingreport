@@ -19,8 +19,8 @@ const CommonChartOption = {
 };
 
 const useTrainingLevelScoreChartDatas: React.FC = (props) => {
-  const { data, selOption } = props;
-  const [dueDate, setDueDate] = useState({ startDate: "0000-00-00", endDate: "0000-00-00" });
+  const { data, selOption, startDate, endDate } = props;
+  const [dueDate, setDueDate] = useState({ startDate: startDate || "0000-00-00", endDate: endDate || "0000-00-00" });
 
   const trainingTypesColor = useMemo(
     () => ({
@@ -82,15 +82,15 @@ const useTrainingLevelScoreChartDatas: React.FC = (props) => {
 
     const selType = { 1: "d", 2: "w", 3: "M" }; // 일별, 주별, 월별
 
-    const midnight = dayjs().format("YYYY-MM-DD 00:00:00");
-    let now = dayjs();
+    const midnight = dayjs(endDate).format("YYYY-MM-DD 00:00:00");
+    let now = dayjs(endDate);
     let startDate = dayjs(midnight).add(-9, selType[selOption]); // 오늘 포함해야하니까 -9로 이동
 
     let ptr = dayjs(midnight).add(-9, selType[selOption]);
 
     // 주별이 선택되어있을때는 월요일로 옮겨야함
     if (selOption === 2) {
-      ptr.day(1);
+      ptr = ptr.day(1);
     }
 
     // 월별이 선택되어있을때는 1일로 옮겨야함
@@ -180,7 +180,7 @@ const useTrainingLevelScoreChartDatas: React.FC = (props) => {
       labels,
       datasets: ds,
     };
-  }, [selOption, data, trainingTypesColor, CommonDataOptions]);
+  }, [selOption, data, trainingTypesColor, CommonDataOptions, endDate]);
 
   const chartOption = useMemo(() => {
     if (!chartData) {

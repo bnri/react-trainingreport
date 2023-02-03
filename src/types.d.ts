@@ -18,7 +18,7 @@ export type tasknames =
 
 export type tasktypes = "Reading" | "Cognitive" | "Tracking" | "Exercise";
 
-interface CommonTrainingType {
+export interface CommonTrainingType {
   level: number;
   reculsiveCount: number; // 일 수행횟수(recul)
   weeklyPerformedDays: number; // 주당 수행일(dayofweek 개수)
@@ -38,7 +38,9 @@ export interface TrainingType extends CommonTrainingType {
   equalTypeCount: number; // 이 type이 지금 몇 개 나왔는지
 }
 
-interface SummaryType extends CommonTrainingType {}
+interface SummaryType extends CommonTrainingType {
+  language?: "한국어" | "영어";
+}
 
 export interface ReportType {
   agencyID: string;
