@@ -1033,11 +1033,24 @@ export default class PDF {
   };
 
   start: () => Promise<boolean> = () => {
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
       if (!preloadDone) {
         console.log("preloadDone is false");
-        resolve(false);
+        return resolve(false);
       }
+
+      const $report = document?.querySelector("#trainingReport") as HTMLDivElement;
+      if (!$report) {
+        return resolve(false);
+      }
+
+      const delay = (d: number) => new Promise((resolve) => setTimeout(() => resolve(true), d));
+
+      const prevWidth = $report.style.width;
+      $report.style.width = "1024px";
+      document.body.style.overflow = "hidden";
+      await delay(1000);
+
       const a = this.makeFirstPage();
       const b = this.makeSecondPage();
       const c = this.makeThirdPage();
@@ -1054,7 +1067,11 @@ export default class PDF {
         resolve(false);
         return;
       }
+
       this.pdf = pdfMake.createPdf(this.doc);
+      $report.style.width = prevWidth;
+      document.body.style.overflow = "unset";
+
       resolve(true);
     });
   };

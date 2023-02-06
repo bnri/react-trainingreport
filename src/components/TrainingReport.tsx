@@ -128,13 +128,13 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
   useImperativeHandle(ref, () => ({
     isPossibleMakePDF: () => preloadDone && Boolean(data),
     generatePDF: () => {
-      return new Promise(async (resolve, reject) => {
+      return new Promise((resolve, reject) => {
         if (!data || !tier) {
           reject("data invalid");
           return;
         }
         const pdf = new PDF(data, tier, dayDD, weekDD, data.agencyLogo);
-        const response = await pdf.start();
+        const response = pdf.start();
         setPdf(pdf);
         resolve(response);
       });
@@ -146,7 +146,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           return;
         }
 
-        const response = await pdf.download();
+        const response = pdf.download();
         resolve(response);
       });
     },
@@ -977,7 +977,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         datalabels: {
           display: true,
           // @ts-ignore
-          formatter: (value) => `${value}%`,
+          formatter: (value) => (value <= 0 ? "" : `${value}%`),
           color: "black",
           anchor: "center",
           align: "center",
@@ -1201,7 +1201,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
   // console.log("data", data);
 
   return (
-    <StyledReport id="report">
+    <StyledReport id="trainingReport">
       <StyledTitleBox id="reportTitle">
         <StyledMainTitle>
           {data.testeeNickname}({data.testeeID})의 리더스아이 트레이닝 수행리포트

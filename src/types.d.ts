@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from "react";
+
 export type tasknames =
   | "SentenceMask"
   | "CategoryFinding"
