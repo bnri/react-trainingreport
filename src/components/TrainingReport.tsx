@@ -1198,7 +1198,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     return <></>;
   }
 
-  console.log("data", data);
+  // console.log("data", data);
 
   return (
     <StyledReport id="report">
