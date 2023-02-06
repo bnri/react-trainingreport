@@ -84,6 +84,13 @@ export interface ReportType {
     Exercise: CommonTrainingType;
     [key: string]: CommonTrainingType;
   };
+  sentencemaskAnalysis: {
+    recentReadingSpeed: { reading_speed: number };
+    recentSMReadingSpeed: number;
+    readingCount: number;
+    agencyAvgReadingCount: number;
+    domainCount: { science: number; social: number; literature: number; etc: number; [key: string]: number };
+  };
 
   groupScoreList: {
     performedRatio: number;

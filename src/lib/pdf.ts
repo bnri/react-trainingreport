@@ -1,16 +1,17 @@
-import { ReportType } from "./../types.d";
+import { ReportType, SummaryType } from "./../types.d";
 import { imgbase64forPDF } from "./base64";
 import pdfMake from "pdfmake/build/pdfmake";
-// @ts-ignore
-// import pdfFonts from "./vfs_fonts_jejumj_gd_cn";
 import { Content, TDocumentDefinitions } from "pdfmake/interfaces";
-import React from "react";
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import { lazy } from "react";
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Asia/Seoul");
 
-// @ts-ignore
-const ReactLazyPreload = (importStatement) => {
-  // @ts-ignore
-  const Component = React.lazy(importStatement);
-  // @ts-ignore
+const ReactLazyPreload = (importStatement: any) => {
+  const Component = lazy(importStatement) as any;
   Component.preload = importStatement;
   return Component;
 };
@@ -31,7 +32,6 @@ pdfFonts.preload().then((res) => {
   preloadDone = true;
 });
 
-// pdfMake.vfs = pdfFonts.pdfMake.vfs;
 pdfMake.tableLayouts = {
   showblackline: {
     hLineWidth: function (i, node) {
@@ -144,13 +144,17 @@ export default class PDF {
   doc: TDocumentDefinitions | null;
   data: ReportType;
   agencyLogo?: string;
+  dayDueDate: { startDate: string; endDate: string };
+  weekDueDate: { startDate: string; endDate: string };
   tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈";
 
-  constructor(data: ReportType, tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈", agencyLogo?: string) {
+  constructor(data: ReportType, tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈", dayDueDate: { startDate: string; endDate: string }, weekDueDate: { startDate: string; endDate: string }, agencyLogo?: string) {
     this.pdf = null;
     this.doc = null;
     this.data = data;
     this.tier = tier;
+    this.dayDueDate = dayDueDate;
+    this.weekDueDate = weekDueDate;
     this.agencyLogo = agencyLogo;
   }
 
@@ -390,6 +394,11 @@ export default class PDF {
             bold: true,
             margin: [0, 10, 0, 10],
           },
+          levelScoreTitle: {
+            fontSize: 10,
+            bold: true,
+            margin: [0, 3, 0, 3],
+          },
           resultTitle: {
             fontSize: 11,
             bold: true,
@@ -404,6 +413,7 @@ export default class PDF {
             fontSize: 9,
             color: "black",
             alignment: "center",
+            fillColor: "#eeedff",
             margin: [0, 2, 0, 0],
           },
           tableItem: {
@@ -441,7 +451,10 @@ export default class PDF {
     const ratioChart = document.getElementById("RatioChart") as HTMLCanvasElement;
     const avgScoreChart = document.getElementById("AvgScoreChart") as HTMLCanvasElement;
     const avgDurationChart = document.getElementById("AvgDurationChart") as HTMLCanvasElement;
-    if (!ratioChart || !avgScoreChart || !avgDurationChart) {
+    const levelScoreDayChart = document.getElementById("levelScoreDayChart") as HTMLCanvasElement;
+    const levelScoreWeekChart = document.getElementById("levelScoreWeekChart") as HTMLCanvasElement;
+
+    if (!ratioChart || !avgScoreChart || !avgDurationChart || !levelScoreDayChart || !levelScoreWeekChart) {
       throw new Error("chart not found");
     }
 
@@ -449,27 +462,11 @@ export default class PDF {
       const ratioSrc = ratioChart.toDataURL();
       const avgScoreSrc = avgScoreChart.toDataURL();
       const avgDurationSrc = avgDurationChart.toDataURL();
-      const headerList = ["할당된 과제", "레벨", "언어", "일 수행횟수", "주당 수행일", "총 수행횟수", "수행률", "총 수행시간", "평균 점수", "총 획득점수"];
-      const typenameList = [
-        "Sentence Mask",
-        "Word Ordering",
-        "Keyword Finding",
-        "Category Finding",
-        "Visual Span",
-        "Visual Counting",
-        "TMT",
-        "Stroop",
-        "Saccade Tracking",
-        "Pursuit Tracking",
-        "Anti Tracking",
-        "Sentence Tracking",
-        "Exercise Horizontal",
-        "Exercise Vertical",
-        "Exercise HJump",
-        "Exercise VJump",
-      ];
+      const levelScoreDaySrc = levelScoreDayChart.toDataURL();
+      const levelScoreWeekSrc = levelScoreWeekChart.toDataURL();
 
       const firstScoreText = `${this.data.firstScore.toLocaleString()}점(${this.data.firstScoreDate} 이후, ${this.tier}, ${this.data.firstScoreRank}위)`;
+      const monthScoreText = `${this.data.monthScore.toLocaleString()}점(${dayjs().format("YY년MM월,")} ${this.data.monthScoreRank}위)`;
 
       this.doc.content = [
         ...(this.doc.content as Content[]),
@@ -494,55 +491,57 @@ export default class PDF {
         {
           table: {
             widths: ["80%", "20%"],
-            heights: [15, 15, 15, 15, 15, 15],
+            heights: [10, 10, 10, 10, 10, 10],
             headerRows: 0,
             body: [
-              [
-                { text: "", border: [false] },
-                { text: "", border: [false] },
-              ],
               [
                 {
                   text: `수행 기관 : ${this.data.agencyName}(${this.data.agencyID})`,
 
-                  fontSize: 12,
+                  fontSize: 10,
                   border: [false],
                 },
-                { rowSpan: 5, image: "메달", width: 47.25, height: 75, alignment: "center", border: [false] },
+                { rowSpan: 6, image: "메달", width: 47.25, height: 75, alignment: "center", border: [false] },
               ],
               [
                 {
                   text: `총 누적점수 : ${this.data.totScore.toLocaleString()}점`,
-
-                  fontSize: 12,
+                  fontSize: 10,
+                  border: [false],
+                },
+              ],
+              [
+                {
+                  text: `월간점수 : ${monthScoreText}`,
+                  fontSize: 10,
                   border: [false],
                 },
               ],
               [
                 {
                   text: `기록 1 : ${firstScoreText}`,
-                  fontSize: 12,
+                  fontSize: 10,
                   border: [false],
                 },
               ],
               [
                 {
                   text: `기록 2 : ${this.data.secondScore.toLocaleString()}점(${this.data.secondScoreDate} 이후)`,
-                  fontSize: 12,
+                  fontSize: 10,
                   border: [false],
                 },
               ],
               [
                 {
                   text: `기간 내 총 획득 점수 : ${this.data.dueScore.toLocaleString()}점`,
-
-                  fontSize: 12,
+                  fontSize: 10,
                   border: [false],
                 },
               ],
             ],
           },
         },
+        { text: `트레이닝 수행 현황`, style: "sectionTitle" },
         {
           margin: [0, 5, 0, 5],
           table: {
@@ -596,56 +595,28 @@ export default class PDF {
         {
           text: `* 기관 평균 : 학생이 속한 기관(${this.data.agencyName})의 전체 학생들의 평균 점수`,
           fontSize: 10,
+          margin: [0, 10, 0, 5],
         },
-        { text: `개별 Training 수행 결과`, style: "sectionTitle" },
+        { text: `트레이닝 레벨스코어 추세`, style: "sectionTitle" },
+        { text: `일별 (${this.dayDueDate.startDate} ~ ${this.dayDueDate.endDate})`, style: "levelScoreTitle" },
         {
-          table: {
-            widths: ["20%", "7%", "8%", "auto", "auto", "auto", "8%", "auto", "auto", "auto"],
-            heights: Array(17).fill(15),
-            headerRows: 1,
-            body: [
-              [
-                ...headerList.map((h) => ({
-                  text: h,
-                  style: "tableHeader",
-                })),
-              ],
-              ...typenameList.map((type) => {
-                const hasType = this.data.trainingList.find((f) => f.taskName === type.replace(" ", ""));
-                if (hasType) {
-                  return [
-                    { style: "tableItem", text: type },
-                    { style: "tableItem", text: parseFloat(hasType.level.toFixed(2)) },
-                    { style: "tableItem", text: hasType.language },
-                    { style: "tableItem", text: `${parseFloat(hasType.reculsiveCount.toFixed(2))}회` },
-                    { style: "tableItem", text: `${parseFloat(hasType.weeklyPerformedDays.toFixed(2))}일` },
-                    { style: "tableItem", text: `${hasType.performedCount} / ${hasType.needPerformedCount}` },
-                    { style: "tableItem", text: `${parseFloat((hasType.performedRatio * 100).toFixed(2))}%` },
-                    { style: "tableItem", text: `${parseFloat(hasType.totDuration.toFixed(2))}분` },
-                    { style: "tableItem", text: `${parseFloat(hasType.avgScore.toFixed(2))}점` },
-                    { style: "tableItem", text: `${parseFloat(hasType.totScore.toFixed(2))}점` },
-                  ];
-                } else {
-                  return [
-                    {
-                      style: "tableItem",
-                      text: type,
-                    },
-                    {
-                      style: "tableItem",
-                      colSpan: 9,
-                      text: "수행 없음",
-                      alignment: "center",
-                    },
-                  ];
-                }
-              }),
-            ],
-          },
-          layout: {
-            hLineColor: () => "#aaa9bc",
-            vLineColor: () => "#aaa9bc",
-          },
+          image: levelScoreDaySrc,
+          alignment: "center",
+          width: 570,
+          height: 135,
+          // fit: [130, 130],
+        },
+        { text: `주별 (${this.weekDueDate.startDate} ~ ${this.weekDueDate.endDate})`, style: "levelScoreTitle" },
+        {
+          image: levelScoreWeekSrc,
+          alignment: "center",
+          width: 570,
+          height: 135,
+        },
+        {
+          text: `* 레벨과 수행점수가 반영된 점수입니다. 1레벨당 20점이 가산됩니다. (레벨스코어 = 점수 + 레벨 x 20)`,
+          fontSize: 10,
+          margin: [0, 10, 0, 0],
         },
       ];
       return true;
@@ -655,15 +626,184 @@ export default class PDF {
     }
   };
 
-  makeThirdPage = async () => {
+  makeThirdPage = () => {
     try {
       if (!this.doc || !this.doc.content) {
         throw new Error("doc or content not found");
       }
+
+      const domainChart = document.getElementById("SentencemaskDomainChart") as HTMLCanvasElement;
+
+      if (!domainChart) {
+        throw new Error("chart not found");
+      }
+
+      const domainChartSrc = domainChart.toDataURL();
+
+      const headerList = ["할당된 과제", "레벨", "언어", "일 수행횟수", "주당 수행일", "총 수행횟수", "수행률", "총 수행시간", "평균 점수", "총 획득점수"];
+      const trainingTypes = [
+        {
+          type: "Reading",
+          names: ["Sentence Mask", "Word Ordering", "Keyword Finding", "Category Finding"],
+        },
+        {
+          type: "Cognitive",
+          names: ["Visual Span", "Visual Counting", "TMT", "Stroop"],
+        },
+        {
+          type: "Tracking",
+          names: ["Saccade Tracking", "Pursuit Tracking", "Anti Tracking", "Sentence Tracking"],
+        },
+        {
+          type: "Exercise",
+          names: ["Exercise Horizontal", "Exercise Vertical", "Exercise HJump", "Exercise VJump"],
+        },
+      ];
+
+      const MakeTableRow = (task: string, data: SummaryType | undefined, hideLanguage: boolean, isHeader?: boolean) => {
+        const style = isHeader ? "tableHeader" : "tableItem";
+        if (!data) {
+          return [
+            {
+              style,
+              text: task,
+            },
+            {
+              style,
+              colSpan: 9,
+              text: "수행 없음",
+              alignment: "center",
+            },
+          ];
+        }
+
+        return [
+          { style, text: task },
+          { style, text: parseFloat(data.level.toFixed(1)) },
+          { style, text: hideLanguage ? "" : data.language },
+          { style, text: `${parseFloat(data.reculsiveCount.toFixed(1))}회` },
+          { style, text: `${parseFloat(data.weeklyPerformedDays.toFixed(1))}일` },
+          { style, text: `${data.performedCount} / ${data.needPerformedCount}` },
+          { style, text: `${parseFloat((data.performedRatio * 100).toFixed(1))}%` },
+          { style, text: `${parseFloat(data.totDuration.toFixed(1))}분` },
+          { style, text: `${parseFloat(data.avgScore.toFixed(1))}점` },
+          { style, text: `${parseFloat(data.totScore.toFixed(1))}점` },
+        ];
+      };
+
+      this.doc.content = [
+        ...(this.doc.content as Content[]),
+
+        { text: `개별 트레이닝 수행 결과`, style: "sectionTitle", pageBreak: "before", margin: [0, 40, 0, 10] },
+        {
+          table: {
+            widths: ["20%", "7%", "8%", "auto", "auto", "auto", "8%", "auto", "auto", "auto"],
+            heights: Array(22).fill(15),
+            headerRows: 1,
+            body: [
+              [
+                ...headerList.map((h) => ({
+                  text: h,
+                  style: "tableHeader",
+                })),
+              ],
+              ...trainingTypes
+                .map((type) => {
+                  const returnComponents = [];
+                  returnComponents.push(
+                    ...type.names.map((task) => {
+                      const find = this.data.trainingList.find((f) => f.taskName === task.split(" ").join(""));
+                      const hideLanguage = find?.taskType === "Reading" || find?.taskName === "SentenceTracking" ? false : true;
+                      return MakeTableRow(task, find, hideLanguage);
+                    })
+                  );
+
+                  returnComponents.push(MakeTableRow(`${type.type} 평균`, this.data.typeSummary[type.type], false, true));
+                  return returnComponents;
+                })
+                .flat(),
+              MakeTableRow(`전체 평균`, this.data.typeSummary.All, false, true),
+            ],
+          },
+          layout: {
+            hLineColor: () => "#aaa9bc",
+            vLineColor: () => "#aaa9bc",
+          },
+        },
+        { text: `글 읽기 트레이닝 분석`, style: "sectionTitle" },
+        {
+          margin: [0, 5, 0, 5],
+          table: {
+            widths: ["1%", "18%", "1%", "50%", "1%", "28%", "1%"],
+            heights: [160],
+            headerRows: 0,
+            body: [
+              [
+                { text: ``, border: [false] },
+                {
+                  stack: [
+                    { text: "읽은 글", alignment: "center", fontSize: 11, margin: [0, 15, 0, 15], bold: true },
+                    { text: `${this.data.sentencemaskAnalysis.readingCount}편`, fontSize: 14, bold: true, margin: [0, 5, 0, 5] },
+                    { text: "기관 평균", alignment: "center", fontSize: 11, margin: [0, 20, 0, 15], bold: true },
+                    { text: `${this.data.sentencemaskAnalysis.agencyAvgReadingCount}편`, fontSize: 12, bold: true, margin: [0, 5, 0, 5] },
+                  ],
+                  alignment: "center",
+                },
+                { text: ``, border: [false] },
+                {
+                  stack: [
+                    {
+                      image: domainChartSrc,
+                      alignment: "center",
+                      width: 210,
+                      height: 160,
+                    },
+                  ],
+                },
+                { text: ``, border: [false] },
+                {
+                  stack: [
+                    { text: "읽은 글 정보", alignment: "center", fontSize: 11, margin: [0, 15, 0, 15], bold: true },
+                    { text: "최근 시선읽기진단 평균 속도", alignment: "center", fontSize: 10, margin: [0, 5, 0, 5] },
+                    { text: `${this.data.sentencemaskAnalysis.recentReadingSpeed.reading_speed}어절/분`, alignment: "center", fontSize: 14, margin: [0, 5, 0, 5], bold: true },
+                    { text: "현재 트레이닝 평균 속도", alignment: "center", fontSize: 10, margin: [0, 20, 0, 5] },
+                    { text: `${this.data.sentencemaskAnalysis.recentSMReadingSpeed}어절/분`, alignment: "center", fontSize: 12, margin: [0, 5, 0, 5], bold: true },
+                  ],
+                },
+                { text: ``, border: [false] },
+              ],
+            ],
+          },
+          layout: {
+            hLineColor: () => "#aaa9bc",
+            vLineColor: () => "#aaa9bc",
+          },
+        },
+        {
+          text: `* Sentence Mask를 통해 제공된 읽기 자료입니다.`,
+          fontSize: 10,
+          margin: [0, 10, 0, 0],
+        },
+      ];
+
+      return true;
+    } catch (err) {
+      console.log("err", err);
+      return false;
+    }
+  };
+
+  makeFourthPage = () => {
+    try {
+      if (!this.doc || !this.doc.content) {
+        throw new Error("doc or content not found");
+      }
+
       const readingChart = document.getElementById("ReadingChart") as HTMLCanvasElement;
       const cognitiveChart = document.getElementById("CognitiveChart") as HTMLCanvasElement;
       const trackingChart = document.getElementById("TrackingChart") as HTMLCanvasElement;
       const exerciseChart = document.getElementById("ExerciseChart") as HTMLCanvasElement;
+
       if (!readingChart || !cognitiveChart || !trackingChart || !exerciseChart) {
         throw new Error("chart not found");
       }
@@ -675,7 +815,7 @@ export default class PDF {
 
       this.doc.content = [
         ...(this.doc.content as Content[]),
-        { text: `개별 Training 수행 결과`, style: "sectionTitle", pageBreak: "before", margin: [0, 30, 0, 10] },
+        { text: `개별 트레이닝 수행 결과`, style: "sectionTitle", pageBreak: "before", margin: [0, 30, 0, 10] },
         {
           margin: [0, 0, 0, 10],
           table: {
@@ -885,7 +1025,6 @@ export default class PDF {
           },
         },
       ];
-
       return true;
     } catch (err) {
       console.log("err", err);
@@ -902,9 +1041,10 @@ export default class PDF {
       const a = this.makeFirstPage();
       const b = this.makeSecondPage();
       const c = this.makeThirdPage();
+      const d = this.makeFourthPage();
 
-      if (!a || !b || !c) {
-        console.log(a, b, c);
+      if (!a || !b || !c || !d) {
+        console.log(a, b, c, d);
         resolve(false);
         return;
       }

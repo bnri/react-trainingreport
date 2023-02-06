@@ -8,10 +8,12 @@ interface GridRowProps {
   find?: SummaryType;
   task: tasknames | tasktypes | string;
   header?: boolean;
+  hideLanguage: boolean;
 }
 
 const GridRow: React.FC<GridRowProps> = (props) => {
-  const { find, isMobileWidth, task, header } = props;
+  const { find, isMobileWidth, task, header, hideLanguage } = props;
+
   const styles = useMemo<React.CSSProperties>(() => {
     return header
       ? {}
@@ -19,6 +21,7 @@ const GridRow: React.FC<GridRowProps> = (props) => {
           background: isMobileWidth ? "#eeedff" : "transparent",
         };
   }, [header, isMobileWidth]);
+
   if (!find) {
     return (
       <StyledGridRow>
@@ -71,7 +74,7 @@ const GridRow: React.FC<GridRowProps> = (props) => {
           {parseFloat(find.avgScore.toFixed(1))}점
         </StyledGridCell>
         <StyledGridCell header={header} order={2} isMobileWidth={isMobileWidth} style={styles}>
-          {find.language}
+          {hideLanguage ? "" : find.language}
         </StyledGridCell>
         <StyledGridCell header={header} order={5} isMobileWidth={isMobileWidth} style={styles}>
           {isMobileWidth ? `${find.performedCount}회` : `${find.performedCount} / ${find.needPerformedCount}`}

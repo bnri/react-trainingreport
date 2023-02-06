@@ -19,7 +19,7 @@ const CommonChartOption = {
 };
 
 const useTrainingLevelScoreChartDatas: React.FC = (props) => {
-  const { data, selOption, startDate, endDate } = props;
+  const { data, selOption, startDate, endDate, language } = props;
   const [dueDate, setDueDate] = useState({ startDate: startDate || "0000-00-00", endDate: endDate || "0000-00-00" });
 
   const trainingTypesColor = useMemo(
@@ -126,7 +126,7 @@ const useTrainingLevelScoreChartDatas: React.FC = (props) => {
           }
           // betweenDateList[k]
 
-          const tr = task.trainingResult[trDateList[j]];
+          const tr = task.task_type === "Reading" ? task.trainingResult[trDateList[j]].filter((f) => f.tr_language === language) : task.trainingResult[trDateList[j]];
           const score = +(tr.reduce((prev, curr) => prev + (curr.tr_score + curr.tr_level * 20), 0) / tr.length).toFixed(1);
           let f;
           // 3이면 월별
@@ -180,7 +180,7 @@ const useTrainingLevelScoreChartDatas: React.FC = (props) => {
       labels,
       datasets: ds,
     };
-  }, [selOption, data, trainingTypesColor, CommonDataOptions, endDate]);
+  }, [selOption, data, trainingTypesColor, CommonDataOptions, endDate, language]);
 
   const chartOption = useMemo(() => {
     if (!chartData) {

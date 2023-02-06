@@ -18112,7 +18112,7 @@ export const NewDummyData = [
       { testee_task_idx: 47234, task_name: "ExerciseVertical", task_type: "Exercise", level: 7, dayofweek: "월,화,수,목,금", language: "한국어", reculsivecount: 2, isactive: 0, trainingResult: {} },
       { testee_task_idx: 47235, task_name: "ExerciseHJump", task_type: "Exercise", level: 7, dayofweek: "월,화,수,목,금", language: "한국어", reculsivecount: 2, isactive: 0, trainingResult: {} },
     ],
-    sentencemask_analysis: { recentReadingSpeed: { reading_speed: 441.529 }, recentSMReadingSpeed: 250, readingCount: 54, agencyAvgReadingCount: 25.7, domainCount: { science: 18, social: 23, literature: 11, etc: 2 } },
+    sentencemask_analysis: { recentReadingSpeed: { reading_speed: 441.5 }, recentSMReadingSpeed: 250, readingCount: 54, agencyAvgReadingCount: 25.7, domainCount: { science: 18, social: 23, literature: 11, etc: 2 } },
     testee_class: "속독",
   },
   {

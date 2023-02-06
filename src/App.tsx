@@ -10,6 +10,16 @@ const App: React.FC = () => {
   return (
     <div className="App">
       <button
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          padding: 20,
+          zIndex: 9999,
+          background: "blue",
+
+          color: "#fff",
+        }}
         onClick={() => {
           if (!ref || !ref.current) {
             return;
@@ -32,7 +42,7 @@ const App: React.FC = () => {
           }
         }}
       >
-        go
+        pdf
       </button>
       <TrainingReport
         ref={ref}

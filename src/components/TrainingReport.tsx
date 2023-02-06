@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
 import { Doughnut, Line, Radar } from "react-chartjs-2";
+import "chartjs-plugin-datalabels";
 import "chartjs-plugin-doughnutlabel";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
@@ -94,9 +95,9 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
   const [pdf, setPdf] = useState<PDF>();
 
   // @ts-ignore
-  const { chartData: dayCD, chartOption: dayCO, dueDate: dayDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 1, startDate: info.start_date, endDate: info.end_date });
+  const { chartData: dayCD, chartOption: dayCO, dueDate: dayDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 1, startDate: info.start_date, endDate: info.end_date, language: info.language });
   // @ts-ignore
-  const { chartData: weekCD, chartOption: weekCO, dueDate: weekDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 2, startDate: info.start_date, endDate: info.end_date });
+  const { chartData: weekCD, chartOption: weekCO, dueDate: weekDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 2, startDate: info.start_date, endDate: info.end_date, language: info.language });
 
   const tier = useMemo(() => {
     if (!data) {
@@ -132,7 +133,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           reject("data invalid");
           return;
         }
-        const pdf = new PDF(data, tier, data.agencyLogo);
+        const pdf = new PDF(data, tier, dayDD, weekDD, data.agencyLogo);
         const response = await pdf.start();
         setPdf(pdf);
         resolve(response);
@@ -185,7 +186,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       totScore: trainingData[meIndex].tts_totalscore || 0,
       firstScore: trainingData[meIndex].tts_firstscore || 0,
       firstScoreDate: trainingData[meIndex].tts_firstscore_resetdate,
-      firstScoreRank: trainingData[meIndex].rank || 0,
+      firstScoreRank: trainingData[meIndex].firstscoreRank || 0,
 
       secondScore: trainingData[meIndex].tts_secondscore || 0,
       secondScoreDate: trainingData[meIndex].tts_secondscore_resetdate,
@@ -206,6 +207,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         Tracking: makeTrainingTypeObject(),
         Exercise: makeTrainingTypeObject(),
       },
+      sentencemaskAnalysis: trainingData[meIndex].sentencemask_analysis!,
     };
 
     // 그룹의 총 점수 계산
@@ -247,8 +249,13 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     const myResultObj: { [key: string]: { duration: number } } = {};
 
     for (let i = 0; i < myTaskList.length; i++) {
-      if (myTaskList[i].isactive === 0 || myTaskList[i].language !== info.language) {
+      if (myTaskList[i].isactive === 0) {
         // 비활성 과제는 pass
+        continue;
+      }
+
+      if ((myTaskList[i].task_type === "Reading" || myTaskList[i].task_name === "SentenceTracking") && myTaskList[i].language !== info.language) {
+        // Reading 타입 또는 SET인데 언어가 다르면 pass
         continue;
       }
 
@@ -820,18 +827,21 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       return;
     }
 
+    const duration = data.avgDuration >= 30 ? 30 : data.avgDuration;
+    const groupDuration = data.groupScoreList.avgDuration >= 30 ? 30 : data.groupScoreList.avgDuration;
+
     return {
       labels: [],
       type: "doughnut",
       datasets: [
         {
-          data: [data.avgDuration, 100 - data.avgDuration],
+          data: [duration, 30 - duration],
           backgroundColor: ["#009bde", "transparent"],
           borderWidth: 0,
           hoverBorderWidth: 0,
         },
         {
-          data: [data.groupScoreList.avgDuration, 100 - data.groupScoreList.avgDuration],
+          data: [groupDuration, 30 - data.groupScoreList.avgDuration],
           backgroundColor: ["#ada9bb", "transparent"],
           borderWidth: 0,
           hoverBorderWidth: 0,
@@ -884,6 +894,101 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       },
     };
   }, [data, avgDurationChartTitle, avgDurationChartData, commonChartOption]);
+
+  const sentencemaskDomainChartData = useMemo(() => {
+    if (!data) {
+      return;
+    }
+
+    const mappingKey: { [key: string]: number } = {
+      science: 0,
+      social: 1,
+      literature: 2,
+      etc: 3,
+    };
+
+    const dataset = [
+      { label: "과학기술", cnt: 0, color: "#009bde" },
+      { label: "인문사회", cnt: 0, color: "#FA8128" },
+      { label: "문학", cnt: 0, color: "#ada9bb" },
+      { label: "기타", cnt: 0, color: "#a6a55d" },
+    ];
+
+    const labels = dataset.map((d) => d.label);
+    const colors = dataset.map((d) => d.color);
+
+    const { readingCount } = data.sentencemaskAnalysis;
+
+    if (readingCount <= 0) {
+      return {
+        labels: labels,
+        datasets: [
+          {
+            label: "",
+            data: dataset.map((d) => d.cnt),
+            backgroundColor: colors,
+            fill: false,
+          },
+        ],
+      };
+    }
+
+    for (const key in data.sentencemaskAnalysis.domainCount) {
+      dataset[mappingKey[key]].cnt = data.sentencemaskAnalysis.domainCount[key];
+    }
+
+    const d = dataset.map((d) => +((d.cnt / readingCount) * 100).toFixed(0));
+
+    return {
+      labels: labels,
+      datasets: [
+        {
+          label: "",
+          data: d,
+          backgroundColor: colors,
+          fill: false,
+        },
+      ],
+    };
+  }, [data]);
+
+  const sentencemaskDomainChartOptions = useMemo(() => {
+    if (!data || !sentencemaskDomainChartData) {
+      return;
+    }
+
+    return {
+      ...commonChartOption,
+      cutoutPercentage: 50,
+      title: {
+        display: true,
+        text: "읽은 글의 종류",
+        fontSize: 16,
+        fontFamily: "'FontAwesome','Helvetica Neue', 'Helvetica', 'Arial', sans-serif", //
+      },
+      legend: {
+        position: "right",
+        labels: {
+          boxWidth: 10,
+          fontSize: 12,
+        },
+      },
+      plugins: {
+        datalabels: {
+          display: true,
+          // @ts-ignore
+          formatter: (value) => `${value}%`,
+          color: "black",
+          anchor: "center",
+          align: "center",
+          font: {
+            size: 12,
+            weight: "bold",
+          },
+        },
+      },
+    };
+  }, [data, sentencemaskDomainChartData, commonChartOption]);
 
   const resultChartTitle = useMemo(() => {
     if (!data) {
@@ -1115,8 +1220,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             월간점수 : {data.monthScore.toLocaleString()}점({dayjs().format("YY년MM월,")} {data.monthScoreRank}위)
           </StyledInfoText>
           <StyledInfoText>
-            기록 1 : {data.firstScore.toLocaleString()}점({data.firstScoreDate} 이후, {tier}, {data.firstScoreRank || 1}
-            위)
+            기록 1 : {data.firstScore.toLocaleString()}점({data.firstScoreDate} 이후, {tier}, {data.firstScoreRank}위)
           </StyledInfoText>
           <StyledInfoText>
             기록 2 : {data.secondScore.toLocaleString()}점({data.secondScoreDate} 이후)
@@ -1158,7 +1262,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             일별 ({dayDD.startDate} ~ {dayDD.endDate})
           </StyledScoreChartBoxTitle>
           <StyledScoreChartBox>
-            <Line data={dayCD} options={dayCO} />
+            <Line id="levelScoreDayChart" data={dayCD} options={dayCO} />
           </StyledScoreChartBox>
         </StyledScoreChartBoxWrapper>
         <StyledScoreChartBoxWrapper>
@@ -1166,7 +1270,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             주별 ({weekDD.startDate} ~ {weekDD.endDate})
           </StyledScoreChartBoxTitle>
           <StyledScoreChartBox>
-            <Line data={weekCD} options={weekCO} />
+            <Line id="levelScoreWeekChart" data={weekCD} options={weekCO} />
           </StyledScoreChartBox>
         </StyledScoreChartBoxWrapper>
         <StyledScoreChartCaption>* 레벨과 수행점수가 반영된 점수입니다. 1레벨당 20점이 가산됩니다. (레벨스코어 = 점수 + 레벨 x 20)</StyledScoreChartCaption>
@@ -1210,23 +1314,57 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             const returnComponents = [];
 
             returnComponents.push(
-              t.names.map((task, j) => {
+              ...t.names.map((task, j) => {
                 const find = data.trainingList.find((f) => f.taskName === task.split(" ").join(""));
-                return <GridRow key={`grid_${i}_${j}`} find={find} isMobileWidth={isMobileWidth} task={task} />;
+                const hideLanguage = find?.taskType === "Reading" || find?.taskName === "SentenceTracking" ? false : true;
+                return <GridRow key={`grid_${i}_${j}`} find={find} isMobileWidth={isMobileWidth} task={task} hideLanguage={hideLanguage} />;
               })
             );
-            returnComponents.push(<GridRow key={`grid_${i}`} header={true} isMobileWidth={isMobileWidth} find={data.typeSummary[t.type]} task={`${t.type} 평균`} />);
+            returnComponents.push(<GridRow key={`grid_${i}`} header={true} isMobileWidth={isMobileWidth} find={data.typeSummary[t.type]} task={`${t.type} 평균`} hideLanguage={false} />);
             return returnComponents;
           })}
-          <GridRow header={true} isMobileWidth={isMobileWidth} find={data.typeSummary.All} task={`전체 평균`} />
+          <GridRow header={true} isMobileWidth={isMobileWidth} find={data.typeSummary.All} task={`전체 평균`} hideLanguage={true} />
         </StyledGrid>
       </StyledGridWrapper>
-      <StyledSentenceMaskAnalysisWrapper>
+      <StyledSentenceMaskAnalysisWrapper id="smAnalysis">
         <StyledSentenceMaskAnalysisTitle>글 읽기 트레이닝 분석</StyledSentenceMaskAnalysisTitle>
         <StyledSentenceMaskAnalysisBoxWrapper>
-          <StyledSentenceMaskAnalysisBox>읽은글</StyledSentenceMaskAnalysisBox>
-          <StyledSentenceMaskAnalysisChartBox>읽은 글의 종류</StyledSentenceMaskAnalysisChartBox>
-          <StyledSentenceMaskAnalysisBox>읽은글 정보</StyledSentenceMaskAnalysisBox>
+          <StyledSentenceMaskAnalysisBox>
+            <div>
+              <h3>읽은 글</h3>
+              <div className="boxRow">
+                <div>
+                  <span className="me">{data.sentencemaskAnalysis.readingCount}</span>편
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3>기관 평균</h3>
+              <div className="boxRow">
+                <div>
+                  <span className="group">{data.sentencemaskAnalysis.agencyAvgReadingCount}</span>편
+                </div>
+              </div>
+            </div>
+          </StyledSentenceMaskAnalysisBox>
+          <StyledSentenceMaskAnalysisChartBox>
+            <Doughnut id="SentencemaskDomainChart" data={sentencemaskDomainChartData} options={sentencemaskDomainChartOptions} />
+          </StyledSentenceMaskAnalysisChartBox>
+          <StyledSentenceMaskAnalysisBox>
+            <h3>읽은 글 정보</h3>
+            <div className="boxRow">
+              최근 시선읽기진단 평균 속도
+              <div>
+                <span className="reading">{data.sentencemaskAnalysis.recentReadingSpeed.reading_speed}</span>어절/분
+              </div>
+            </div>
+            <div className="boxRow">
+              현재 트레이닝 평균 속도
+              <div>
+                <span className="sm">{data.sentencemaskAnalysis.recentSMReadingSpeed}</span>어절/분
+              </div>
+            </div>
+          </StyledSentenceMaskAnalysisBox>
         </StyledSentenceMaskAnalysisBoxWrapper>
         <StyledSentenceMaskAnalysisCaption>* Sentence Mask를 통해 제공된 읽기 자료입니다.</StyledSentenceMaskAnalysisCaption>
       </StyledSentenceMaskAnalysisWrapper>
@@ -1452,7 +1590,7 @@ const StyledScoreChartWrapper = styled(StyledWrapper)``;
 const StyledScoreChartTitle = styled(StyledHeaderTitle)``;
 const StyledScoreChartBoxWrapper = styled.div`
   width: 100%;
-  height: 230px;
+  height: 280px;
   margin-bottom: 10px;
 `;
 const StyledScoreChartBoxTitle = styled.h3`
@@ -1463,7 +1601,7 @@ const StyledScoreChartBoxTitle = styled.h3`
   margin: 0;
 `;
 const StyledScoreChartBox = styled.div`
-  height: 200px;
+  height: 250px;
 `;
 const StyledScoreChartCaption = styled.span`
   font-size: 1.2em;
@@ -1543,9 +1681,71 @@ const StyledSentenceMaskAnalysisTitle = styled(StyledHeaderTitle)``;
 const StyledSentenceMaskAnalysisBoxWrapper = styled.div`
   display: flex;
   gap: 1em;
+  margin-bottom: 10px;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  min-height: 250px;
+  > div {
+    border: 1px solid #ada9bb;
+  }
 `;
-const StyledSentenceMaskAnalysisBox = styled.div``;
-const StyledSentenceMaskAnalysisChartBox = styled.div``;
+const StyledSentenceMaskAnalysisBox = styled.div`
+  min-width: 180px;
+  min-height: 250px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-size: 1.4em;
+  > div {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  h3 {
+    width: 100%;
+    font-weight: 600;
+    margin: 0;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .boxRow {
+    width: 100%;
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .me,
+  .group,
+  .reading,
+  .sm {
+    font-weight: 700;
+  }
+
+  .me {
+    font-size: 2em;
+  }
+  .group {
+    font-size: 1.6em;
+  }
+  .reading {
+    font-size: 1.6em;
+  }
+  .sm {
+    font-size: 1.4em;
+  }
+`;
+const StyledSentenceMaskAnalysisChartBox = styled.div`
+  padding: 10px;
+  height: 250px;
+`;
 const StyledSentenceMaskAnalysisCaption = styled.span`
   font-size: 1.2em;
 `;
