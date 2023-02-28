@@ -48,6 +48,7 @@ export interface ReportType {
   agencyID: string;
   agencyName: string;
   agencyLogo?: string;
+  orgLogo?: string;
 
   testeeIdx: number;
   testeeID: string;
@@ -249,6 +250,7 @@ export interface ReportProps {
   info: {
     start_date: string;
     end_date: string;
+    org_logo?: string;
     agency_logo?: string;
     language: "한국어" | "영어";
   };

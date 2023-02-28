@@ -133,7 +133,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           reject("data invalid");
           return;
         }
-        const pdf = new PDF(data, tier, dayDD, weekDD, data.agencyLogo);
+        const pdf = new PDF(data, tier, dayDD, weekDD, data.agencyLogo, data.orgLogo);
         const response = pdf.start();
         setPdf(pdf);
         resolve(response);
@@ -174,6 +174,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       agencyID: trainingData[meIndex].agency_ID,
       agencyName: trainingData[meIndex].agency_name,
       agencyLogo: info.agency_logo,
+      orgLogo: info.org_logo,
 
       testeeIdx: trainingData[meIndex].testee_idx,
       testeeID: trainingData[meIndex].user_ID,
@@ -1204,7 +1205,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     <StyledReport id="trainingReport">
       <StyledTitleBox id="reportTitle">
         <StyledMainTitle>
-          {data.testeeNickname}({data.testeeID})의 리더스아이 트레이닝 수행리포트
+          {data.testeeNickname}({data.testeeID})의 트레이닝 수행 리포트
         </StyledMainTitle>
         <StyledDueTitle>
           {data.startdate} ~ {data.enddate}

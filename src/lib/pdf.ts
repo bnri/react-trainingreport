@@ -144,11 +144,12 @@ export default class PDF {
   doc: TDocumentDefinitions | null;
   data: ReportType;
   agencyLogo?: string;
+  orgLogo?: string;
   dayDueDate: { startDate: string; endDate: string };
   weekDueDate: { startDate: string; endDate: string };
   tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈";
 
-  constructor(data: ReportType, tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈", dayDueDate: { startDate: string; endDate: string }, weekDueDate: { startDate: string; endDate: string }, agencyLogo?: string) {
+  constructor(data: ReportType, tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈", dayDueDate: { startDate: string; endDate: string }, weekDueDate: { startDate: string; endDate: string }, agencyLogo?: string, orgLogo?: string) {
     this.pdf = null;
     this.doc = null;
     this.data = data;
@@ -156,6 +157,7 @@ export default class PDF {
     this.dayDueDate = dayDueDate;
     this.weekDueDate = weekDueDate;
     this.agencyLogo = agencyLogo;
+    this.orgLogo = orgLogo;
   }
 
   makeFirstPage = () => {
@@ -163,9 +165,9 @@ export default class PDF {
       this.doc = {
         pageSize: "A4",
         info: {
-          title: "리더스아이 트레이닝 수행리포트",
+          title: "트레이닝 수행리포트",
           author: "bnri",
-          subject: "리더스아이 트레이닝 수행리포트",
+          subject: "트레이닝 수행리포트",
           keywords: "",
         },
         pageMargins: [20, 40, 20, 20],
@@ -317,7 +319,7 @@ export default class PDF {
                 [
                   {
                     margin: [10, 220, 10, 10],
-                    text: "리더스아이 트레이닝 수행리포트",
+                    text: "트레이닝 수행리포트",
                     bold: true,
                     fontSize: 26,
                     alignment: "center",
@@ -379,7 +381,7 @@ export default class PDF {
         ],
 
         images: {
-          readerseyeLogo: imgbase64forPDF["리더스아이로고가로"],
+          readerseyeLogo: this.orgLogo ? this.orgLogo : imgbase64forPDF["리더스아이로고가로"],
           학원로고: this.agencyLogo ? this.agencyLogo : imgbase64forPDF["기본로고"],
           메달: imgbase64forPDF[this.tier],
         },
@@ -473,7 +475,7 @@ export default class PDF {
         {
           stack: [
             {
-              text: `${this.data.testeeNickname}(${this.data.testeeID})의 리더스아이 트레이닝 수행리포트`,
+              text: `${this.data.testeeNickname}(${this.data.testeeID})의 트레이닝 수행 리포트`,
               alignment: "center",
               bold: true,
               fontSize: 18,
