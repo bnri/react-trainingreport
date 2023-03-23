@@ -61,10 +61,10 @@ const makeTrainingList = (language: "한국어" | "영어") => {
     { type: "Tracking", name: "PursuitTracking" },
     { type: "Tracking", name: "AntiTracking" },
     { type: "Tracking", name: "SentenceTracking" },
-    { type: "Exercise", name: "ExerciseHorizontal" },
-    { type: "Exercise", name: "ExerciseVertical" },
-    { type: "Exercise", name: "ExerciseHJump" },
-    { type: "Exercise", name: "ExerciseVJump" },
+    { type: "Exercise", name: "HorizontalJump" },
+    { type: "Exercise", name: "VerticalJump" },
+    { type: "Exercise", name: "HorizontalSaccade" },
+    { type: "Exercise", name: "VerticalSaccade" },
   ];
   return typenameList.map((t) => makeTrainingObject(t, language));
 };
@@ -225,10 +225,10 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       PursuitTracking: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
       AntiTracking: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
       SentenceTracking: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
-      ExerciseHorizontal: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
-      ExerciseVertical: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
-      ExerciseHJump: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
-      ExerciseVJump: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
+      HorizontalJump: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
+      VerticalJump: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
+      HorizontalSaccade: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
+      VerticalSaccade: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
     };
 
     let myPerformedCount = 0; // 수행률 계산, 내가 수행한 횟수
@@ -520,10 +520,10 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       PursuitTracking: 0,
       AntiTracking: 0,
       SentenceTracking: 0,
-      ExerciseHorizontal: 0,
-      ExerciseVertical: 0,
-      ExerciseHJump: 0,
-      ExerciseVJump: 0,
+      HorizontalJump: 0,
+      VerticalJump: 0,
+      HorizontalSaccade: 0,
+      VerticalSaccade: 0,
     };
 
     const typeList = Object.keys(groupScoreObject);
@@ -598,7 +598,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       },
       {
         type: "Exercise",
-        names: ["Exercise Horizontal", "Exercise Vertical", "Exercise HJump", "Exercise VJump"],
+        names: ["Horizontal Jump", "Vertical Jump", "Horizontal Saccade", "Vertical Saccade"],
       },
     ];
   }, []);
@@ -1150,14 +1150,14 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     if (!data) {
       return;
     }
-    const eh = data.trainingList.find((f) => f.taskName === "ExerciseHorizontal");
-    const ev = data.trainingList.find((f) => f.taskName === "ExerciseVertical");
-    const ehj = data.trainingList.find((f) => f.taskName === "ExerciseHJump");
-    const evj = data.trainingList.find((f) => f.taskName === "ExerciseVJump");
+    const eh = data.trainingList.find((f) => f.taskName === "HorizontalJump");
+    const ev = data.trainingList.find((f) => f.taskName === "VerticalJump");
+    const ehj = data.trainingList.find((f) => f.taskName === "HorizontalSaccade");
+    const evj = data.trainingList.find((f) => f.taskName === "VerticalSaccade");
 
     return {
       titleIndex: 3,
-      labels: ["ExerciseHorizontal", "ExerciseVertical", "ExerciseHJump", "ExerciseVJump"],
+      labels: ["HorizontalJump", "VerticalJump", "HorizontalSaccade", "VerticalSaccade"],
       type: "radar",
       datasets: [
         {
@@ -1169,7 +1169,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         },
         {
           label: "Group",
-          data: [data.groupScoreList.ExerciseHorizontal || 0, data.groupScoreList.ExerciseVertical || 0, data.groupScoreList.ExerciseHJump || 0, data.groupScoreList.ExerciseVJump || 0],
+          data: [data.groupScoreList.HorizontalJump || 0, data.groupScoreList.VerticalJump || 0, data.groupScoreList.HorizontalSaccade || 0, data.groupScoreList.VerticalSaccade || 0],
           borderColor: "#ada9bb",
           backgroundColor: "#ada9bb",
           fill: false,
@@ -1434,10 +1434,10 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             <StyledResultText>
               <span>&nbsp;읽기 과정의 핵심 시선이동인 도약안구운동(saccade)을 빠르고 정확하게 훈련합니다. 시선추적장치를 활용합니다.</span>
               <ul>
-                <li>Horizontal Sweep : 수평방향으로 최대 폭의 시선이동을 훈련합니다.</li>
-                <li>Vertical Sweep : 수직방향으로 최대 폭의 시선이동을 훈련합니다.</li>
-                <li>Horizontal Jump : 읽기에 필요한 너비의 수평방향 시선이동을 훈련합니다.</li>
-                <li>Vertical Jump : 읽기에 필요한 너비의 수직방향 시선이동을 훈련합니다.</li>
+                <li>Horizontal Jump : 수평방향으로 최대 폭의 시선이동을 훈련합니다.</li>
+                <li>Vertical Jump : 수직방향으로 최대 폭의 시선이동을 훈련합니다.</li>
+                <li>Horizontal Saccade : 읽기에 필요한 너비의 수평방향 시선이동을 훈련합니다.</li>
+                <li>Vertical Saccade : 읽기에 필요한 너비의 수직방향 시선이동을 훈련합니다.</li>
               </ul>
             </StyledResultText>
           </StyledResultTextBox>

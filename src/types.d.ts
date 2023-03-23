@@ -13,10 +13,10 @@ export type tasknames =
   | "PursuitTracking"
   | "AntiTracking"
   | "SentenceTracking"
-  | "ExerciseHorizontal"
-  | "ExerciseVertical"
-  | "ExerciseHJump"
-  | "ExerciseVJump";
+  | "HorizontalJump"
+  | "VerticalJump"
+  | "HorizontalSaccade"
+  | "VerticalSaccade";
 
 export type tasktypes = "Reading" | "Cognitive" | "Tracking" | "Exercise";
 
@@ -111,10 +111,10 @@ export interface ReportType {
     PursuitTracking: number;
     AntiTracking: number;
     SentenceTracking: number;
-    ExerciseHorizontal: number;
-    ExerciseVertical: number;
-    ExerciseHJump: number;
-    ExerciseVJump: number;
+    HorizontalJump: number;
+    VerticalJump: number;
+    HorizontalSaccade: number;
+    VerticalSaccade: number;
   };
 }
 

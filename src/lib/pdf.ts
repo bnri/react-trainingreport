@@ -658,7 +658,7 @@ export default class PDF {
         },
         {
           type: "Exercise",
-          names: ["Exercise Horizontal", "Exercise Vertical", "Exercise HJump", "Exercise VJump"],
+          names: ["Horizontal Jump", "Vertical Jump", "Horizontal Saccade", "Vertical Saccade"],
         },
       ];
 
@@ -1003,19 +1003,19 @@ export default class PDF {
                       ul: [
                         {
                           style: "resultText",
-                          text: "Horizontal Sweep : 수평방향으로 최대 폭의 시선이동을 훈련합니다.",
+                          text: "Horizontal Jump : 수평방향으로 최대 폭의 시선이동을 훈련합니다.",
                         },
                         {
                           style: "resultText",
-                          text: "Vertical Sweep : 수직방향으로 최대 폭의 시선이동을 훈련합니다.",
+                          text: "Vertical Jump : 수직방향으로 최대 폭의 시선이동을 훈련합니다.",
                         },
                         {
                           style: "resultText",
-                          text: "Horizontal Jump : 읽기에 필요한 너비의 수평방향 시선이동을 훈련합니다.",
+                          text: "Horizontal Saccade : 읽기에 필요한 너비의 수평방향 시선이동을 훈련합니다.",
                         },
                         {
                           style: "resultText",
-                          text: "Vertical Jump : 읽기에 필요한 너비의 수직방향 시선이동을 훈련합니다.",
+                          text: "Vertical Saccade : 읽기에 필요한 너비의 수직방향 시선이동을 훈련합니다.",
                         },
                       ],
                     },
