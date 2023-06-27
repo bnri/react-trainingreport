@@ -32,6 +32,7 @@ const useTrainingLevelScoreChartDatas: React.FC = (props) => {
       TMT: "#46bbbb",
       Stroop: "#a6a55d",
       WordOrdering: "#00f",
+      RSVP: "#0ff",
     }),
     []
   );

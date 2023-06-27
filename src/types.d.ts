@@ -5,6 +5,7 @@ export type tasknames =
   | "CategoryFinding"
   | "KeywordFinding"
   | "WordOrdering"
+  | "RSVP"
   | "VisualSpan"
   | "VisualCounting"
   | "TMT"

@@ -53,6 +53,7 @@ const makeTrainingList = (language: "한국어" | "영어") => {
     { type: "Reading", name: "WordOrdering" },
     { type: "Reading", name: "KeywordFinding" },
     { type: "Reading", name: "CategoryFinding" },
+    { type: "Reading", name: "RSVP" },
     { type: "Cognitive", name: "VisualSpan" },
     { type: "Cognitive", name: "VisualCounting" },
     { type: "Cognitive", name: "TMT" },
@@ -217,6 +218,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       CategoryFinding: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
       KeywordFinding: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
       WordOrdering: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
+      RSVP: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
       VisualSpan: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
       VisualCounting: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
       TMT: { avgTotScore: 0, avgTotDuration: 0, cnt: 0 },
@@ -512,6 +514,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       CategoryFinding: 0,
       KeywordFinding: 0,
       WordOrdering: 0,
+      RSVP: 0,
       VisualSpan: 0,
       VisualCounting: 0,
       TMT: 0,
@@ -586,7 +589,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     return [
       {
         type: "Reading",
-        names: ["Sentence Mask", "Word Ordering", "Keyword Finding", "Category Finding"],
+        names: ["Sentence Mask", "Word Ordering", "Keyword Finding", "Category Finding", "RSVP"],
       },
       {
         type: "Cognitive",
