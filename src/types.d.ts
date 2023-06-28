@@ -104,6 +104,7 @@ export interface ReportType {
     CategoryFinding: number;
     KeywordFinding: number;
     WordOrdering: number;
+    RSVP: number;
     VisualSpan: number;
     VisualCounting: number;
     TMT: number;

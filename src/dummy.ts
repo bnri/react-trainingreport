@@ -18112,7 +18112,7 @@ export const NewDummyData = [
       { testee_task_idx: 47233, task_name: "HorizontalJump", task_type: "Exercise", level: 7, dayofweek: "월,화,수,목,금", language: "한국어", reculsivecount: 2, isactive: 0, trainingResult: {} },
       { testee_task_idx: 47234, task_name: "VerticalJump", task_type: "Exercise", level: 7, dayofweek: "월,화,수,목,금", language: "한국어", reculsivecount: 2, isactive: 0, trainingResult: {} },
       { testee_task_idx: 47235, task_name: "HorizontalSaccade", task_type: "Exercise", level: 7, dayofweek: "월,화,수,목,금", language: "한국어", reculsivecount: 2, isactive: 0, trainingResult: {} },
-            {
+      {
         testee_task_idx: 47777,
         task_name: "RSVP",
         task_type: "Reading",
@@ -18122,7 +18122,6 @@ export const NewDummyData = [
         reculsivecount: 3,
         isactive: 1,
         trainingResult: {
-
           "2023-01-09": [
             { trainingresult_idx: 4407, testee_task_idx: 47221, tr_starttime: "2023-01-09", tr_language: "한국어", tr_level: 4, tr_accuracyrate: 0.33, tr_score: 33, tr_duration: 95.911, trainingtext_idx: 356, tr_feeling: "적당하다", tt_domain: "인문사회" },
             { trainingresult_idx: 4410, testee_task_idx: 47221, tr_starttime: "2023-01-09", tr_language: "한국어", tr_level: 4, tr_accuracyrate: 0.67, tr_score: 67, tr_duration: 69.363, trainingtext_idx: 286, tr_feeling: "적당하다", tt_domain: "과학기술" },
@@ -18180,7 +18179,6 @@ export const NewDummyData = [
             { trainingresult_idx: 43423, testee_task_idx: 47221, tr_starttime: "2023-01-27", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.67, tr_score: 67, tr_duration: 34.806, trainingtext_idx: 17, tr_feeling: "적당하다", tt_domain: "문학" },
             { trainingresult_idx: 43424, testee_task_idx: 47221, tr_starttime: "2023-01-27", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.67, tr_score: 67, tr_duration: 92.439, trainingtext_idx: 143, tr_feeling: "적당하다", tt_domain: "문학" },
           ],
-
         },
       },
     ],
@@ -31791,6 +31789,77 @@ export const NewDummyChartData = [
       "2023-01-27": [
         { trainingresult_idx: 43446, testee_task_idx: 47231, tr_starttime: "2023-01-27", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.89, tr_score: 88.69, tr_duration: 136.826, trainingtext_idx: null, tr_feeling: null },
         { trainingresult_idx: 43447, testee_task_idx: 47231, tr_starttime: "2023-01-27", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.89, tr_score: 89.14, tr_duration: 162.668, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-30": [
+        { trainingresult_idx: 47490, testee_task_idx: 47231, tr_starttime: "2023-01-30", tr_language: "한국어", tr_level: 6, tr_accuracyrate: 0.81, tr_score: 80.94, tr_duration: 181.197, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 47495, testee_task_idx: 47231, tr_starttime: "2023-01-30", tr_language: "한국어", tr_level: 6, tr_accuracyrate: 0.87, tr_score: 87.22, tr_duration: 201.541, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-31": [
+        { trainingresult_idx: 50064, testee_task_idx: 47231, tr_starttime: "2023-01-31", tr_language: "한국어", tr_level: 6, tr_accuracyrate: 0.83, tr_score: 83.19, tr_duration: 167.777, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 50065, testee_task_idx: 47231, tr_starttime: "2023-01-31", tr_language: "한국어", tr_level: 6, tr_accuracyrate: 0.86, tr_score: 85.62, tr_duration: 167.824, trainingtext_idx: null, tr_feeling: null },
+      ],
+    },
+  },
+  {
+    testee_task_idx: 47777,
+    testee_idx: 3982,
+    trainingtask_idx: 11,
+    dayofweek: "월,화,수,목,금",
+    level: 6,
+    reculsivecount: 2,
+    language: "한국어",
+    changed_date: "2023-01-13T11:27:09.000Z",
+    level_update_duration: 7,
+    isactive: 1,
+    task_name: "RSVP",
+    task_type: "Reading",
+    task_basic_reculsivecount: 2,
+    task_isdelete: 0,
+    trainingResult: {
+      "2023-01-09": [
+        { trainingresult_idx: 4443, testee_task_idx: 47231, tr_starttime: "2023-01-09", tr_language: "한국어", tr_level: 4, tr_accuracyrate: 0.89, tr_score: 89.41, tr_duration: 107.615, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 4447, testee_task_idx: 47231, tr_starttime: "2023-01-09", tr_language: "한국어", tr_level: 4, tr_accuracyrate: 0.91, tr_score: 91, tr_duration: 124.331, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-10": [
+        { trainingresult_idx: 7447, testee_task_idx: 47231, tr_starttime: "2023-01-10", tr_language: "한국어", tr_level: 4, tr_accuracyrate: 0.87, tr_score: 86.96, tr_duration: 112.249, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 7458, testee_task_idx: 47231, tr_starttime: "2023-01-10", tr_language: "한국어", tr_level: 4, tr_accuracyrate: 0.89, tr_score: 89.32, tr_duration: 157.438, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-12": [
+        { trainingresult_idx: 12911, testee_task_idx: 47231, tr_starttime: "2023-01-12", tr_language: "한국어", tr_level: 4, tr_accuracyrate: 0.94, tr_score: 93.87, tr_duration: 110.242, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 12918, testee_task_idx: 47231, tr_starttime: "2023-01-12", tr_language: "한국어", tr_level: 4, tr_accuracyrate: 0.9, tr_score: 90.04, tr_duration: 119.462, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-13": [
+        { trainingresult_idx: 16085, testee_task_idx: 47231, tr_starttime: "2023-01-13", tr_language: "한국어", tr_level: 4, tr_accuracyrate: 0.94, tr_score: 94.34, tr_duration: 120.043, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 16094, testee_task_idx: 47231, tr_starttime: "2023-01-13", tr_language: "한국어", tr_level: 4, tr_accuracyrate: 0.92, tr_score: 91.57, tr_duration: 121.663, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-16": [
+        { trainingresult_idx: 20169, testee_task_idx: 47231, tr_starttime: "2023-01-16", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.9, tr_score: 90.22, tr_duration: 141.694, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 20171, testee_task_idx: 47231, tr_starttime: "2023-01-16", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.86, tr_score: 86.24, tr_duration: 161.982, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-18": [
+        { trainingresult_idx: 26199, testee_task_idx: 47231, tr_starttime: "2023-01-18", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.85, tr_score: 85.46, tr_duration: 188.758, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 26210, testee_task_idx: 47231, tr_starttime: "2023-01-18", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.85, tr_score: 85.08, tr_duration: 190.862, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-19": [
+        { trainingresult_idx: 29062, testee_task_idx: 47231, tr_starttime: "2023-01-19", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.93, tr_score: 93.44, tr_duration: 131.828, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 29063, testee_task_idx: 47231, tr_starttime: "2023-01-19", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.86, tr_score: 86.4, tr_duration: 184.107, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-20": [
+        { trainingresult_idx: 31947, testee_task_idx: 47231, tr_starttime: "2023-01-20", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.85, tr_score: 85.18, tr_duration: 191.317, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 31948, testee_task_idx: 47231, tr_starttime: "2023-01-20", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.9, tr_score: 89.91, tr_duration: 135.391, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-24": [
+        { trainingresult_idx: 36839, testee_task_idx: 47231, tr_starttime: "2023-01-24", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.96, tr_score: 96.17, tr_duration: 100.429, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 36840, testee_task_idx: 47231, tr_starttime: "2023-01-24", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.9, tr_score: 90.33, tr_duration: 151.487, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-25": [
+        { trainingresult_idx: 38152, testee_task_idx: 47227, tr_starttime: "2023-01-25", tr_language: "한국어", tr_level: 7, tr_accuracyrate: 0.88, tr_score: 85, tr_duration: 48.702, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 38153, testee_task_idx: 47227, tr_starttime: "2023-01-25", tr_language: "한국어", tr_level: 7, tr_accuracyrate: 1, tr_score: 100, tr_duration: 47.356, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 38154, testee_task_idx: 47227, tr_starttime: "2023-01-25", tr_language: "한국어", tr_level: 7, tr_accuracyrate: 0.88, tr_score: 85, tr_duration: 48.164, trainingtext_idx: null, tr_feeling: null },
+      ],
+      "2023-01-26": [
+        { trainingresult_idx: 40798, testee_task_idx: 47231, tr_starttime: "2023-01-26", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.81, tr_score: 81.1, tr_duration: 187.942, trainingtext_idx: null, tr_feeling: null },
+        { trainingresult_idx: 40799, testee_task_idx: 47231, tr_starttime: "2023-01-26", tr_language: "한국어", tr_level: 5, tr_accuracyrate: 0.86, tr_score: 86.23, tr_duration: 164.708, trainingtext_idx: null, tr_feeling: null },
       ],
       "2023-01-30": [
         { trainingresult_idx: 47490, testee_task_idx: 47231, tr_starttime: "2023-01-30", tr_language: "한국어", tr_level: 6, tr_accuracyrate: 0.81, tr_score: 80.94, tr_duration: 181.197, trainingtext_idx: null, tr_feeling: null },

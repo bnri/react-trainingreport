@@ -1010,22 +1010,23 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     const wo = data.trainingList.find((f) => f.taskName === "WordOrdering");
     const kf = data.trainingList.find((f) => f.taskName === "KeywordFinding");
     const cf = data.trainingList.find((f) => f.taskName === "CategoryFinding");
+    const rsvp = data.trainingList.find((f) => f.taskName === "RSVP");
 
     return {
       titleIndex: 0,
-      labels: ["SentenceMask", "WordOrdering", "KeywordFinding", "CategoryFinding"],
+      labels: ["SentenceMask", "WordOrdering", "KeywordFinding", "CategoryFinding", "RSVP"],
       type: "radar",
       datasets: [
         {
           label: "Me",
-          data: [(sm && sm.avgScore) || 0, (wo && wo.avgScore) || 0, (kf && kf.avgScore) || 0, (cf && cf.avgScore) || 0],
+          data: [(sm && sm.avgScore) || 0, (wo && wo.avgScore) || 0, (kf && kf.avgScore) || 0, (cf && cf.avgScore) || 0, (rsvp && rsvp.avgScore) || 0],
           borderColor: "#009bde",
           backgroundColor: "#009bde",
           fill: false,
         },
         {
           label: "Group",
-          data: [data.groupScoreList.SentenceMask || 0, data.groupScoreList.WordOrdering || 0, data.groupScoreList.KeywordFinding || 0, data.groupScoreList.CategoryFinding || 0],
+          data: [data.groupScoreList.SentenceMask || 0, data.groupScoreList.WordOrdering || 0, data.groupScoreList.KeywordFinding || 0, data.groupScoreList.CategoryFinding || 0, data.groupScoreList.RSVP || 0],
           borderColor: "#ada9bb",
           backgroundColor: "#ada9bb",
           fill: false,

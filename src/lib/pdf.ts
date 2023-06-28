@@ -646,7 +646,7 @@ export default class PDF {
       const trainingTypes = [
         {
           type: "Reading",
-          names: ["Sentence Mask", "Word Ordering", "Keyword Finding", "Category Finding"],
+          names: ["Sentence Mask", "Word Ordering", "Keyword Finding", "Category Finding", "RSVP"],
         },
         {
           type: "Cognitive",
