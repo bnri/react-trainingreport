@@ -468,7 +468,7 @@ export default class PDF {
       const levelScoreWeekSrc = levelScoreWeekChart.toDataURL();
 
       const firstScoreText = `${this.data.firstScore.toLocaleString()}점(${this.data.firstScoreDate} 이후, ${this.tier}, ${this.data.firstScoreRank}위)`;
-      const monthScoreText = `${this.data.monthScore.toLocaleString()}점(${dayjs().format("YY년MM월,")} ${this.data.monthScoreRank}위)`;
+      const monthScoreText = `${this.data.monthScore.toLocaleString()}점(${dayjs().format("YY년 MM월,")} ${this.data.monthScoreRank}위)`;
 
       this.doc.content = [
         ...(this.doc.content as Content[]),
