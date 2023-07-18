@@ -847,7 +847,7 @@ export default class PDF {
                       ul: [
                         {
                           style: "resultText",
-                          text: "Word Ordering : 뒤섞여 있는 어절들을 정상적인 문장이 되도록 순서를 맞춰야 합니다.",
+                          text: "Word Ordering : 뒤섞인 어절들의 순서를 맞춥니다.",
                         },
                         {
                           style: "resultText",
@@ -860,6 +860,10 @@ export default class PDF {
                         {
                           style: "resultText",
                           text: "Category Finding : 글에서 특정 카테고리(범주)에 해당하는 단어들을 빠르게 탐지해야 합니다.",
+                        },
+                        {
+                          style: "resultText",
+                          text: "RSVP : 순차적으로 제시되는 문장을 읽습니다.",
                         },
                       ],
                     },

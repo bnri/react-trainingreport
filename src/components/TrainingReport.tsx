@@ -1384,10 +1384,11 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             <StyledResultText>
               <span>&nbsp;읽기를 기반으로 속도 제어, 안정성 향상, 문장 완성, 어휘의 탐색 및 판단 능력을 향상시키는 훈련입니다.</span>
               <ul>
-                <li>Word Ordering : 뒤섞여 있는 어절들을 정상적인 문장이 되도록 순서를 맞춰야 합니다.</li>
+                <li>Word Ordering : 뒤섞인 어절들의 순서를 맞춥니다.</li>
                 <li>Sentence Mask : 일정한 속도로, 순차적으로 보여지는 글을 속도에 맞춰 읽어야 합니다.</li>
                 <li>Keyword Finding : 글에서 특정 키워드를 빠르게 탐지해야 합니다.</li>
                 <li>Category Finding : 글에서 특정 카테고리(범주)에 해당하는 단어들을 빠르게 탐지해야 합니다.</li>
+                <li>RSVP : 순차적으로 제시되는 문장을 읽습니다.</li>
               </ul>
             </StyledResultText>
           </StyledResultTextBox>
