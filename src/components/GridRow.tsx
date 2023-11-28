@@ -80,7 +80,7 @@ const GridRow: React.FC<GridRowProps> = (props) => {
           {isMobileWidth ? `${find.performedCount}회` : `${find.performedCount} / ${find.needPerformedCount}`}
         </StyledGridCell>
         <StyledGridCell header={header} order={7} isMobileWidth={isMobileWidth} style={styles}>
-          {parseFloat(find.totDuration.toFixed(1))}분
+          {parseFloat((find.totDuration / 60).toFixed(1))}분
         </StyledGridCell>
         <StyledGridCell header={header} order={9} isMobileWidth={isMobileWidth} style={styles}>
           {parseFloat(find.totScore.toFixed(1))}점

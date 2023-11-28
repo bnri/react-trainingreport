@@ -149,7 +149,14 @@ export default class PDF {
   weekDueDate: { startDate: string; endDate: string };
   tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈";
 
-  constructor(data: ReportType, tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈", dayDueDate: { startDate: string; endDate: string }, weekDueDate: { startDate: string; endDate: string }, agencyLogo?: string, orgLogo?: string) {
+  constructor(
+    data: ReportType,
+    tier: "다이아몬드" | "플래티넘" | "골드" | "실버" | "브론즈",
+    dayDueDate: { startDate: string; endDate: string },
+    weekDueDate: { startDate: string; endDate: string },
+    agencyLogo?: string,
+    orgLogo?: string
+  ) {
     this.pdf = null;
     this.doc = null;
     this.data = data;
@@ -467,7 +474,9 @@ export default class PDF {
       const levelScoreDaySrc = levelScoreDayChart.toDataURL();
       const levelScoreWeekSrc = levelScoreWeekChart.toDataURL();
 
-      const firstScoreText = `${this.data.firstScore.toLocaleString()}점(${this.data.firstScoreDate} 이후, ${this.tier}, ${this.data.firstScoreRank}위)`;
+      const firstScoreText = `${this.data.firstScore.toLocaleString()}점(${this.data.firstScoreDate} 이후, ${this.tier}, ${
+        this.data.firstScoreRank
+      }위)`;
       const monthScoreText = `${this.data.monthScore.toLocaleString()}점(${dayjs().format("YY년 MM월,")} ${this.data.monthScoreRank}위)`;
 
       this.doc.content = [
@@ -642,7 +651,18 @@ export default class PDF {
 
       const domainChartSrc = domainChart.toDataURL();
 
-      const headerList = ["할당된 과제", "레벨", "언어", "일 수행횟수", "주당 수행일", "총 수행횟수", "수행률", "총 수행시간", "평균 점수", "총 획득점수"];
+      const headerList = [
+        "할당된 과제",
+        "레벨",
+        "언어",
+        "일 수행횟수",
+        "주당 수행일",
+        "총 수행횟수",
+        "수행률",
+        "총 수행시간",
+        "평균 점수",
+        "총 획득점수",
+      ];
       const trainingTypes = [
         {
           type: "Reading",
@@ -687,7 +707,7 @@ export default class PDF {
           { style, text: `${parseFloat(data.weeklyPerformedDays.toFixed(1))}일` },
           { style, text: `${data.performedCount} / ${data.needPerformedCount}` },
           { style, text: `${parseFloat((data.performedRatio * 100).toFixed(1))}%` },
-          { style, text: `${parseFloat(data.totDuration.toFixed(1))}분` },
+          { style, text: `${parseFloat((data.totDuration / 60).toFixed(1))}분` },
           { style, text: `${parseFloat(data.avgScore.toFixed(1))}점` },
           { style, text: `${parseFloat(data.totScore.toFixed(1))}점` },
         ];
@@ -767,9 +787,21 @@ export default class PDF {
                   stack: [
                     { text: "읽은 글 정보", alignment: "center", fontSize: 11, margin: [0, 15, 0, 15], bold: true },
                     { text: "최근 시선읽기진단 평균 속도", alignment: "center", fontSize: 10, margin: [0, 5, 0, 5] },
-                    { text: `${this.data.sentencemaskAnalysis.recentReadingSpeed.reading_speed}어절/분`, alignment: "center", fontSize: 14, margin: [0, 5, 0, 5], bold: true },
+                    {
+                      text: `${this.data.sentencemaskAnalysis.recentReadingSpeed.reading_speed}어절/분`,
+                      alignment: "center",
+                      fontSize: 14,
+                      margin: [0, 5, 0, 5],
+                      bold: true,
+                    },
                     { text: "현재 트레이닝 평균 속도", alignment: "center", fontSize: 10, margin: [0, 20, 0, 5] },
-                    { text: `${this.data.sentencemaskAnalysis.recentSMReadingSpeed}어절/분`, alignment: "center", fontSize: 12, margin: [0, 5, 0, 5], bold: true },
+                    {
+                      text: `${this.data.sentencemaskAnalysis.recentSMReadingSpeed}어절/분`,
+                      alignment: "center",
+                      fontSize: 12,
+                      margin: [0, 5, 0, 5],
+                      bold: true,
+                    },
                   ],
                 },
                 { text: ``, border: [false] },
