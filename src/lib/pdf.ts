@@ -336,7 +336,7 @@ export default class PDF {
                 [
                   {
                     margin: [10, 0, 10, 250],
-                    text: `${this.data.startdate}~${this.data.enddate}`,
+                    text: `${this.data.dateMsg}`,
                     bold: true,
                     fontSize: 20,
                     alignment: "center",
@@ -491,7 +491,7 @@ export default class PDF {
               margin: [0, 40, 0, 0],
             },
             {
-              text: `${this.data.startdate} ~ ${this.data.enddate}`,
+              text: `${this.data.dateMsg}`,
               alignment: "center",
               bold: true,
               fontSize: 14,

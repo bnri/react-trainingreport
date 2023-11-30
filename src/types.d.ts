@@ -58,6 +58,8 @@ export interface ReportType {
 
   startdate: string; // 기준 시작일
   enddate: string; // 기준 종료일
+  mode: boolean; // 기간 모드
+  dateMsg: string;
 
   totScore: number; // 총점
   firstScore: number; // 기록1
@@ -255,5 +257,6 @@ export interface ReportProps {
     org_logo?: string;
     agency_logo?: string;
     language: "한국어" | "영어";
+    mode: string;
   };
 }

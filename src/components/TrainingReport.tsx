@@ -96,8 +96,10 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
   const [pdf, setPdf] = useState<PDF>();
 
   // @ts-ignore
-  const { chartData: dayCD, chartOption: dayCO, dueDate: dayDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 1, startDate: info.start_date, endDate: info.end_date, language: info.language });
+  // prettier-ignore
+  const {chartData: dayCD, chartOption: dayCO, dueDate: dayDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 1, startDate: info.start_date, endDate: info.end_date, language: info.language });
   // @ts-ignore
+  // prettier-ignore
   const { chartData: weekCD, chartOption: weekCO, dueDate: weekDD } = useTrainingLevelScoreChartDatas({ data: chartData, selOption: 2, startDate: info.start_date, endDate: info.end_date, language: info.language });
 
   const tier = useMemo(() => {
@@ -170,6 +172,32 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       return;
     }
 
+    let dateMsg = "";
+    if (info.mode === "0") {
+      dateMsg = `${info.start_date} ~ ${info.end_date}`;
+    } else {
+      const modeSplit = info.mode.split("");
+      modeSplit.splice(0, 1); // mode 날리기
+      const year = +modeSplit.splice(0, 4).join("");
+      const unit = +modeSplit.splice(0, 1).join("");
+      const period = +modeSplit.splice(0).join("");
+
+      dateMsg = `${year}년`;
+      if (unit === 1) {
+        // 연도
+      } else if (unit === 2) {
+        // 반기
+        dateMsg += ` ${period === 1 ? "상반기" : "하반기"}`;
+      } else if (unit === 3) {
+        // 분기
+        dateMsg += ` ${period}분기`;
+      } else if (unit === 4) {
+        // 월별
+        dateMsg += ` ${period}월`;
+      }
+      dateMsg += `(${info.start_date} ~ ${info.end_date})`;
+    }
+
     // @ts-ignore;
     const resultData: ReportType = {
       agencyID: trainingData[meIndex].agency_ID,
@@ -184,6 +212,8 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
 
       startdate: info.start_date,
       enddate: info.end_date,
+      mode: info.mode !== "0",
+      dateMsg,
 
       totScore: trainingData[meIndex].tts_totalscore || 0,
       firstScore: trainingData[meIndex].tts_firstscore || 0,
@@ -1019,14 +1049,26 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       datasets: [
         {
           label: "Me",
-          data: [(sm && sm.avgScore) || 0, (wo && wo.avgScore) || 0, (kf && kf.avgScore) || 0, (cf && cf.avgScore) || 0, (rsvp && rsvp.avgScore) || 0],
+          data: [
+            (sm && sm.avgScore) || 0,
+            (wo && wo.avgScore) || 0,
+            (kf && kf.avgScore) || 0,
+            (cf && cf.avgScore) || 0,
+            (rsvp && rsvp.avgScore) || 0,
+          ],
           borderColor: "#009bde",
           backgroundColor: "#009bde",
           fill: false,
         },
         {
           label: "Group",
-          data: [data.groupScoreList.SentenceMask || 0, data.groupScoreList.WordOrdering || 0, data.groupScoreList.KeywordFinding || 0, data.groupScoreList.CategoryFinding || 0, data.groupScoreList.RSVP || 0],
+          data: [
+            data.groupScoreList.SentenceMask || 0,
+            data.groupScoreList.WordOrdering || 0,
+            data.groupScoreList.KeywordFinding || 0,
+            data.groupScoreList.CategoryFinding || 0,
+            data.groupScoreList.RSVP || 0,
+          ],
           borderColor: "#ada9bb",
           backgroundColor: "#ada9bb",
           fill: false,
@@ -1075,7 +1117,12 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         },
         {
           label: "Group",
-          data: [data.groupScoreList.VisualSpan || 0, data.groupScoreList.VisualCounting || 0, data.groupScoreList.TMT || 0, data.groupScoreList.Stroop || 0],
+          data: [
+            data.groupScoreList.VisualSpan || 0,
+            data.groupScoreList.VisualCounting || 0,
+            data.groupScoreList.TMT || 0,
+            data.groupScoreList.Stroop || 0,
+          ],
           borderColor: "#ada9bb",
           backgroundColor: "#ada9bb",
           fill: false,
@@ -1124,7 +1171,12 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         },
         {
           label: "Group",
-          data: [data.groupScoreList.SaccadeTracking || 0, data.groupScoreList.PursuitTracking || 0, data.groupScoreList.AntiTracking || 0, data.groupScoreList.SentenceTracking || 0],
+          data: [
+            data.groupScoreList.SaccadeTracking || 0,
+            data.groupScoreList.PursuitTracking || 0,
+            data.groupScoreList.AntiTracking || 0,
+            data.groupScoreList.SentenceTracking || 0,
+          ],
           borderColor: "#ada9bb",
           backgroundColor: "#ada9bb",
           fill: false,
@@ -1173,7 +1225,12 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         },
         {
           label: "Group",
-          data: [data.groupScoreList.HorizontalJump || 0, data.groupScoreList.VerticalJump || 0, data.groupScoreList.HorizontalSaccade || 0, data.groupScoreList.VerticalSaccade || 0],
+          data: [
+            data.groupScoreList.HorizontalJump || 0,
+            data.groupScoreList.VerticalJump || 0,
+            data.groupScoreList.HorizontalSaccade || 0,
+            data.groupScoreList.VerticalSaccade || 0,
+          ],
           borderColor: "#ada9bb",
           backgroundColor: "#ada9bb",
           fill: false,
@@ -1211,9 +1268,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
         <StyledMainTitle>
           {data.testeeNickname}({data.testeeID})의 트레이닝 수행 리포트
         </StyledMainTitle>
-        <StyledDueTitle>
-          {data.startdate} ~ {data.enddate}
-        </StyledDueTitle>
+        <StyledDueTitle>{data.dateMsg}</StyledDueTitle>
       </StyledTitleBox>
       <StyledInfoBox id="reportInfo">
         <StyledInfoLeftBox>
@@ -1278,7 +1333,9 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
             <Line id="levelScoreWeekChart" data={weekCD} options={weekCO} />
           </StyledScoreChartBox>
         </StyledScoreChartBoxWrapper>
-        <StyledScoreChartCaption>* 레벨과 수행점수가 반영된 점수입니다. 1레벨당 20점이 가산됩니다. (레벨스코어 = 점수 + 레벨 x 20)</StyledScoreChartCaption>
+        <StyledScoreChartCaption>
+          * 레벨과 수행점수가 반영된 점수입니다. 1레벨당 20점이 가산됩니다. (레벨스코어 = 점수 + 레벨 x 20)
+        </StyledScoreChartCaption>
       </StyledScoreChartWrapper>
       <StyledGridWrapper id="reportTable">
         <StyledGridTitle>개별 트레이닝 수행 결과</StyledGridTitle>
@@ -1325,7 +1382,16 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
                 return <GridRow key={`grid_${i}_${j}`} find={find} isMobileWidth={isMobileWidth} task={task} hideLanguage={hideLanguage} />;
               })
             );
-            returnComponents.push(<GridRow key={`grid_${i}`} header={true} isMobileWidth={isMobileWidth} find={data.typeSummary[t.type]} task={`${t.type} 평균`} hideLanguage={false} />);
+            returnComponents.push(
+              <GridRow
+                key={`grid_${i}`}
+                header={true}
+                isMobileWidth={isMobileWidth}
+                find={data.typeSummary[t.type]}
+                task={`${t.type} 평균`}
+                hideLanguage={false}
+              />
+            );
             return returnComponents;
           })}
           <GridRow header={true} isMobileWidth={isMobileWidth} find={data.typeSummary.All} task={`전체 평균`} hideLanguage={true} />
@@ -1419,7 +1485,10 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           <StyledResultTextBox>
             <StyledResultTextTitle>Tracking Type</StyledResultTextTitle>
             <StyledResultText>
-              <span>&nbsp;읽기와 시지각의 기본이 되는 안구운동의 제어와 통제, 지각 집중력을 향상시킵니다. 시선추적장치를 활용하며, 게임 형식으로 진행합니다.</span>
+              <span>
+                &nbsp;읽기와 시지각의 기본이 되는 안구운동의 제어와 통제, 지각 집중력을 향상시킵니다. 시선추적장치를 활용하며, 게임 형식으로
+                진행합니다.
+              </span>
               <ul>
                 <li>Saccade Tracking : 상하좌우에 나타나는 점을 빠르고 정확하게 움직여 시선을 고정시켜야 합니다.</li>
                 <li>Pursuit Tracking : 직선 또는 원운동 하는 점을 부드럽고 안정적으로 추적하며 보아야 합니다.</li>

@@ -19,6 +19,8 @@
     "start": "set PORT=3002 && react-scripts start",
     "build": "rmdir /S /Q dist && tsc && npm run copy",
     "copy": "copy src\\types.d.ts dist\\types.d.ts && copy src\\lib\\*.js dist\\lib\\*.js",
+    "major": "npm version major && npm run build && npm publish && git push origin main",
+    "minor": "npm version minor && npm run build && npm publish && git push origin main",
     "patch": "npm version patch && npm run build && npm publish && git push origin main"
   },
   "eslintConfig": {
