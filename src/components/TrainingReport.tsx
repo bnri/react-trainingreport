@@ -11,6 +11,7 @@ import { ReportProps, ReportType, tasknames, tasktypes, TrainingType } from "../
 import { imgbase64forPDF } from "../lib/base64";
 import useTrainingLevelScoreChartDatas from "../hooks/useTrainingLevelScoreChartDatas";
 import GridRow from "./GridRow";
+import useNewTrainingLevelScoreChartDatas from "../hooks/useNewTrainingLevelScoreChartDatas";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -94,6 +95,18 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
   const [isMobileWidth, setIsMobileWidth] = useState<boolean>(false);
   const [data, setData] = useState<ReportType>();
   const [pdf, setPdf] = useState<PDF>();
+
+  const { dueDate } = useNewTrainingLevelScoreChartDatas({
+    data: {},
+    type: "Reading",
+    startDate: info.start_date,
+    endDate: info.end_date,
+    language: info.language,
+  });
+  if (dueDate) {
+    console.log("dueDate", dueDate.startDate.format("YYYY-MM-DD"));
+    console.log("dueDate", dueDate.endDate.format("YYYY-MM-DD"));
+  }
 
   // @ts-ignore
   // prettier-ignore
