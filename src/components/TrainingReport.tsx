@@ -96,17 +96,27 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
   const [data, setData] = useState<ReportType>();
   const [pdf, setPdf] = useState<PDF>();
 
-  const { dueDate } = useNewTrainingLevelScoreChartDatas({
-    data: {},
+  console.log("chartData", chartData);
+
+  const {
+    chartData: ReadingChartData,
+    chartOption: ReadingChartOption,
+    dueDate,
+  } = useNewTrainingLevelScoreChartDatas({
+    data: chartData.filter((v) => v.task_type === "Reading"),
     type: "Reading",
     startDate: info.start_date,
     endDate: info.end_date,
     language: info.language,
   });
-  if (dueDate) {
-    console.log("dueDate", dueDate.startDate.format("YYYY-MM-DD"));
-    console.log("dueDate", dueDate.endDate.format("YYYY-MM-DD"));
-  }
+
+  const { chartData: CognitiveChartData, chartOption: CognitiveChartOption } = useNewTrainingLevelScoreChartDatas({
+    data: chartData.filter((v) => v.task_type === "Cognitive"),
+    type: "Cognitive",
+    startDate: info.start_date,
+    endDate: info.end_date,
+    language: info.language,
+  });
 
   // @ts-ignore
   // prettier-ignore
@@ -1269,7 +1279,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
     };
   }, [resultChartTitle, exerciseChartData, commonResultChartOption]);
 
-  if (!data || !tier || !medal || !dayCD || !weekCD) {
+  if (!data || !tier || !medal || !readingChartData || !cognitiveChartData) {
     return <></>;
   }
 
@@ -1331,6 +1341,18 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
       <StyledScoreChartWrapper id="reportScoreChart">
         <StyledScoreChartTitle>트레이닝 레벨스코어 추세</StyledScoreChartTitle>
         <StyledScoreChartBoxWrapper>
+          <StyledScoreChartBoxTitle>Reading</StyledScoreChartBoxTitle>
+          <StyledScoreChartBox>
+            <Line id="levelScoreReadingChart" data={ReadingChartData} options={ReadingChartOption} />
+          </StyledScoreChartBox>
+        </StyledScoreChartBoxWrapper>
+        <StyledScoreChartBoxWrapper>
+          <StyledScoreChartBoxTitle>Cognitive</StyledScoreChartBoxTitle>
+          <StyledScoreChartBox>
+            <Line id="levelScoreCognitiveChart" data={CognitiveChartData} options={CognitiveChartOption} />
+          </StyledScoreChartBox>
+        </StyledScoreChartBoxWrapper>
+        {/* <StyledScoreChartBoxWrapper>
           <StyledScoreChartBoxTitle>
             일별 ({dayDD.startDate} ~ {dayDD.endDate})
           </StyledScoreChartBoxTitle>
@@ -1345,7 +1367,7 @@ const TrainingReport = forwardRef<ImperativeType, ReportProps>((props, ref) => {
           <StyledScoreChartBox>
             <Line id="levelScoreWeekChart" data={weekCD} options={weekCO} />
           </StyledScoreChartBox>
-        </StyledScoreChartBoxWrapper>
+        </StyledScoreChartBoxWrapper> */}
         <StyledScoreChartCaption>
           * 레벨과 수행점수가 반영된 점수입니다. 1레벨당 20점이 가산됩니다. (레벨스코어 = 점수 + 레벨 x 20)
         </StyledScoreChartCaption>

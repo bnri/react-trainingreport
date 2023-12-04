@@ -127,7 +127,10 @@ const useTrainingLevelScoreChartDatas: React.FC = (props) => {
           }
           // betweenDateList[k]
 
-          const tr = ["Reading", "Cognitive"].includes(task.task_type) || task.task_name === "SentenceTracking" ? task.trainingResult[trDateList[j]].filter((f) => f.tr_language === language) : task.trainingResult[trDateList[j]];
+          const tr =
+            ["Reading", "Cognitive"].includes(task.task_type) || task.task_name === "SentenceTracking"
+              ? task.trainingResult[trDateList[j]].filter((f) => f.tr_language === language)
+              : task.trainingResult[trDateList[j]];
           const score = +(tr.reduce((prev, curr) => prev + (curr.tr_score + curr.tr_level * 20), 0) / tr.length).toFixed(1);
           let f;
           // 3이면 월별

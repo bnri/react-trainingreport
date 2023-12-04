@@ -54,8 +54,9 @@ const App: React.FC = () => {
         chartData={NewDummyChartData}
         meIndex={61}
         info={{
+          // todo : api에서도 날짜 확인해서 쿼리 해야함(tr 날짜 범위때문에)
           start_date: "2023-01-01",
-          end_date: "2023-01-11",
+          end_date: "2023-01-31",
           mode: "1202341",
           agency_logo: "",
           org_logo:
